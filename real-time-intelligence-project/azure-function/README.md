@@ -50,7 +50,6 @@ azure-function/
 Each function folder contains:
 - `__init__.py` - Function implementation
 - `function.json` - Function trigger and binding configuration
-- `__pycache__/` - Python cache directory
 
 ## Configuration
 
