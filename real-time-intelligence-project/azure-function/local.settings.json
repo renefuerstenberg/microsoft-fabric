@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "EventHubName": "EventHubName",
+    "EventHubConnectionString": "EventHubConnectionString",
+    "SourceURL": "http://192.168.178.104/deviceMessages/"
+  }
+}
