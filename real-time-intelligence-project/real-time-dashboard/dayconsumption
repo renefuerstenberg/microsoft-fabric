@@ -1,0 +1,8 @@
+SilverSitedata
+| where Timestamp > startofday(now())  // nur heute
+  and SensorName == "Energy Consumption Total Day"
+| extend TimeLocal = Timestamp // +2h für MESZ
+| extend ValueNumeric = todouble(Value)
+| summarize Value_kWh = max(ValueNumeric) by bin(TimeLocal, 10m)
+| order by TimeLocal asc
+| render timechart

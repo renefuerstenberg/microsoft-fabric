@@ -1,0 +1,193 @@
+
+.execute database script <|
+// Table import_solarsystem
+.create table import_solarsystem (
+    ['Sensor Name']:string, 
+    Value:string,
+    Timestamp:string, 
+    Modul:string
+)
+// Table SilverInverter
+.create table SilverInverter (
+    SensorName:string, 
+    Value:string,
+    Unit:string, 
+    Timestamp:datetime
+)
+// Table SilverWallbox
+.create table  SilverWallbox (
+    SensorName:string, 
+    Value:string,
+    Unit:string, 
+    Timestamp:datetime
+)
+// Table SilverPowersensor
+.create table SilverPowersensor (
+    SensorName:string, 
+    Value:string,
+    Unit:string, 
+    Timestamp:datetime
+)
+// Table SilverBattery
+.create table SilverBattery (
+    SensorName:string, 
+    Value:string,
+    Unit:string, 
+    Timestamp:datetime
+)
+// Table SilverIotedgedevice
+.create table SilverIotedgeDevice (
+    SensorName:string, 
+    Value:string,
+    Unit:string, 
+    Timestamp:datetime
+)
+// Table SilverSiteData
+.create table SilverSitedata (
+    SensorName:string, 
+    Value:string,
+    Unit:string, 
+    Timestamp:datetime
+)
+// update policy SilverInverter
+.create-or-alter function  with (folder="Bronze to Silver Transformation") transformationSilverInverter()
+{
+    import_solarsystem
+    | extend ['Sensor Name'] = replace(@"\.", " ", ['Sensor Name'])
+    | extend Timestamp = replace(@"\u202F", " ", ['Timestamp']) 
+    | extend Timestamp = replace(@"⚠️", "", Timestamp) 
+    | extend Timestamp = trim(" ", Timestamp)
+    | extend Timestamp = todatetime(Timestamp)
+    | where Modul == "Inverter" and not(['Sensor Name'] in (
+        "State AlarmCodes 1", "State AlarmCodes 2",
+        "Mode Forcible Charge Discharge", "Setting Charge From Grid", "State AlarmCodes 3", 
+        "Inverter Running State", "SerialNumber", "Power Grid Maximum Feed"
+    ))
+    | extend 
+        Value = tostring(extract(@"^([-+]?[0-9]*\.?[0-9]+)", 1, Value)), 
+        Unit = extract(@"[°a-zA-Z%]+$", 0, Value)//,
+        //Timestamp = datetime_utc_to_local(Timestamp, "Europe/Berlin"),
+        //EventProcessedUtcTime = datetime_utc_to_local(EventProcessedUtcTime, "Europe/Berlin")
+    | project 
+        SensorName = ['Sensor Name'],
+        Value,
+        Unit,
+        Timestamp
+}
+//use alter function to table
+.alter table SilverInverter policy update @'[{"Source": "import_solarsystem", "Query": "transformationSilverInverter", "IsEnabled" : true, "IsTransactional": false }]'
+// update function policy battery
+.create-or-alter function  with (folder="Bronze to Silver Transformation") transformationSilverBattery()
+{
+import_solarsystem
+    | extend ['Sensor Name'] = replace(@"\.", " ", ['Sensor Name'])
+    | extend Timestamp = replace(@"\u202F", " ", ['Timestamp']) 
+    | extend Timestamp = replace(@"⚠️", "", Timestamp) 
+    | extend Timestamp = trim(" ", Timestamp)
+    | extend Timestamp = todatetime(Timestamp)
+    | where Modul == "Battery" and not(['Sensor Name'] in (
+        "Battery Running State", "Mode Battery Working", "Battery Force ChargeDisCharge Mode",
+        "Mode Forcible Charge Discharge", "Storage Power Of Charge From Grid", "Setting Charge From Grid",
+        "Mode Power Active", "Inverter System State"
+    ))
+    | extend 
+        Value = tostring(extract(@"^([-+]?[0-9]*\.?[0-9]+)", 1, Value)), 
+        Unit = extract(@"[°a-zA-Z%]+$", 0, Value)//,
+        //Timestamp = datetime_utc_to_local(Timestamp, "Europe/Berlin"),
+        //EventProcessedUtcTime = datetime_utc_to_local(EventProcessedUtcTime, "Europe/Berlin")
+    | project 
+        SensorName = ['Sensor Name'],
+        Value,
+        Unit,
+        Timestamp
+}
+//
+.alter table SilverBattery policy update @'[{"Source": "import_solarsystem", "Query": "transformationSilverBattery", "IsEnabled" : true, "IsTransactional": false }]'
+// update function policy powersensor
+.create-or-alter function  with (folder="Bronze to Silver Transformation") transformationSilverPowersensor()
+{
+import_solarsystem
+    | extend ['Sensor Name'] = replace(@"\.", " ", ['Sensor Name'])
+    | extend Timestamp = replace(@"\u202F", " ", ['Timestamp']) 
+    | extend Timestamp = replace(@"⚠️", "", Timestamp) 
+    | extend Timestamp = trim(" ", Timestamp)
+    | extend Timestamp = todatetime(Timestamp)
+    | where Modul == "Powersensor"
+    | extend 
+        Value = tostring(extract(@"^([-+]?[0-9]*\.?[0-9]+)", 1, Value)), 
+        Unit = extract(@"[°a-zA-Z%]+$", 0, Value)//,
+        //Timestamp = datetime_utc_to_local(Timestamp, "Europe/Berlin"),
+        //EventProcessedUtcTime = datetime_utc_to_local(EventProcessedUtcTime, "Europe/Berlin")
+    | project 
+        SensorName = ['Sensor Name'],
+        Value,
+        Unit,
+        Timestamp
+}
+//
+.alter table SilverPowersensor policy update @'[{"Source": "import_solarsystem", "Query": "transformationSilverPowersensor", "IsEnabled" : true, "IsTransactional": false }]'
+//use function wallbox
+.create-or-alter function  with (folder="Bronze to Silver Transformation") transformationSilverWallbox()
+{
+import_solarsystem
+    | extend ['Sensor Name'] = replace(@"\.", " ", ['Sensor Name'])
+    | extend Timestamp = replace(@"\u202F", " ", ['Timestamp']) 
+    | extend Timestamp = replace(@"⚠️", "", Timestamp) 
+    | extend Timestamp = trim(" ", Timestamp)
+    | extend Timestamp = todatetime(Timestamp)
+    | where Modul == "Wallbox"
+    | extend 
+        Value = tostring(extract(@"^([-+]?[0-9]*\.?[0-9]+)", 1, Value)), 
+        Unit = extract(@"[°a-zA-Z%]+$", 0, Value)//,
+        //Timestamp = datetime_utc_to_local(Timestamp, "Europe/Berlin"),
+        //EventProcessedUtcTime = datetime_utc_to_local(EventProcessedUtcTime, "Europe/Berlin")
+    | project 
+        SensorName = ['Sensor Name'],
+        Value,
+        Unit,
+        Timestamp
+}
+//
+.alter table SilverWallbox policy update @'[{"Source": "import_solarsystem", "Query": "transformationSilverWallbox", "IsEnabled" : true, "IsTransactional": false }]'
+//use function Sitedata
+.create-or-alter function  with (folder="Bronze to Silver Transformation") transformationSilverSitedata()
+{
+import_solarsystem
+    | extend ['Sensor Name'] = replace(@"\.", " ", ['Sensor Name'])
+    | extend Timestamp = replace(@"\u202F", " ", ['Timestamp']) 
+    | extend Timestamp = replace(@"⚠️", "", Timestamp) 
+    | extend Timestamp = trim(" ", Timestamp)
+    | extend Timestamp = todatetime(Timestamp)
+    | where Modul == "Sitedata"
+    | extend 
+        Value = tostring(extract(@"^([-+]?[0-9]*\.?[0-9]+)", 1, Value)), 
+        Unit = extract(@"[°a-zA-Z%]+$", 0, Value)//,
+        //Timestamp = datetime_utc_to_local(Timestamp, "Europe/Berlin"),
+        //EventProcessedUtcTime = datetime_utc_to_local(EventProcessedUtcTime, "Europe/Berlin")
+    | project 
+        SensorName = ['Sensor Name'],
+        Value,
+        Unit,
+        Timestamp
+}
+//
+.alter table SilverSitedata policy update @'[{"Source": "import_solarsystem", "Query": "transformationSilverSitedata", "IsEnabled" : true, "IsTransactional": false }]'
+.create-or-alter function with (folder = "Bronze to Silver Transformation", skipvalidation = "true") transformationSilverSitedata() {
+    import_solarsystem
+    | extend ['Sensor Name'] = replace(@"\.", " ", ['Sensor Name'])
+    | extend Timestamp = replace(@"\u202F", " ", ['Timestamp']) 
+    | extend Timestamp = replace(@"⚠️", "", Timestamp) 
+    | extend Timestamp = trim(" ", Timestamp)
+    | extend Timestamp = todatetime(Timestamp)
+    | where Modul == "Sitedata"
+    | extend 
+        Value = tostring(extract(@"^([-+]?[0-9]*\.?[0-9]+)", 1, Value)), 
+        Unit = extract(@"[°a-zA-Z%]+$", 0, Value)//,
+        //Timestamp = datetime_utc_to_local(Timestamp, "Europe/Berlin"),
+        //EventProcessedUtcTime = datetime_utc_to_local(EventProcessedUtcTime, "Europe/Berlin")
+    | project 
+        SensorName = ['Sensor Name'],
+        Value,
+        Unit,
+        Timestamp
+}

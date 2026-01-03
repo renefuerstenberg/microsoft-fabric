@@ -1,0 +1,11 @@
+let _endTime = datetime(2026-01-03T12:58:51Z);
+let _startTime = datetime(2026-01-03T12:43:51Z);
+SilverBattery
+| where SensorName == "Energy Battery Charge Level"
+  and Timestamp between (_startTime .. _endTime)
+| extend ChargePercent = todouble(Value)
+| extend Minute = bin(Timestamp, 1m)
+| summarize LastEvent = arg_max(Timestamp, ChargePercent) by Minute
+| project Minute, ChargePercent
+| order by Minute asc
+| render timechart

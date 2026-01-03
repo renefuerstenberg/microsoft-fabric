@@ -1,0 +1,11 @@
+let _endTime = datetime(2026-01-03T12:59:47Z);
+let _startTime = datetime(2026-01-03T12:44:47Z);
+SilverSitedata
+| where Timestamp between (_startTime .. _endTime)
+| where SensorName == "Power Consumption Total"
+| extend CleanValue = replace_string(Value, ",", "")
+| extend Power_Watt = todouble(CleanValue)
+| where Power_Watt between (0 .. 20000)
+| summarize Power_Watt = avg(Power_Watt) by bin(Timestamp, 1m)
+| project Timestamp, Power_Watt
+| render timechart
