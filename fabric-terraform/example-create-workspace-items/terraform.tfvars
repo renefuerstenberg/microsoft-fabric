@@ -1,0 +1,6 @@
+workspace_name = "Customer Workspace"
+capacity_name = "ccdfabricprod2"
+warehouse_name = "warehouse01"
+lakehouse_name = "lakehouse01"
+notebook_folder_name = "Notebooks"
+notebook_1_name = "NB Get Azure Resources Tenant 1"
