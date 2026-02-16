@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 # ==============================
 OUTPUT_DIR = "parquet_export"
 TABLE_NAME = "sensor_data"
-CHUNK_ROWS = 100_000  # Zeilen pro Chunk
+CHUNK_ROWS = 100_000  # Rows per Chunk
 WATERMARK_FILE = "last_watermark.txt"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -21,7 +21,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 FABRIC_SCHEMA = pa.schema([
     pa.field("id", pa.int64(), nullable=False),
     pa.field("house_name", pa.string(), nullable=False),
-    pa.field("sensor_path", pa.string(), nullable=False),  # ltree als string
+    pa.field("sensor_path", pa.string(), nullable=False),  # ltree as string
     pa.field("recorded_at", pa.timestamp('ms'), nullable=False),
     pa.field("value_numeric", pa.decimal128(12, 4), nullable=True),
     pa.field("value_text", pa.string(), nullable=True),
@@ -56,7 +56,7 @@ conn = psycopg2.connect(
     port=5432
 )
 
-cur = conn.cursor(name="sensor_cursor")  # server-seitiger Cursor
+cur = conn.cursor(name="sensor_cursor")  # server-side Cursor
 
 # ==============================
 # Prepare Query
