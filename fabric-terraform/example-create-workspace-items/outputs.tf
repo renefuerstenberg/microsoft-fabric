@@ -18,3 +18,11 @@ output "warehouse_name" {
   value       = fabric_warehouse.warehouse_name.display_name
 }
 
+output "notebookfolder_name" {
+  value = fabric_folder.folder_for_notebooks.display_name
+}
+
+output "pipelinesfolder_name" {
+  value = fabric_folder.folder_for_pipelines.display_name
+}
+
