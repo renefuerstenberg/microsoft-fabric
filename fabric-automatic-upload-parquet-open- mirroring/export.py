@@ -1,92 +1,122 @@
 import os
-from azure.identity import ClientSecretCredential
-from azure.storage.filedatalake import DataLakeServiceClient
+import pandas as pd
+import psycopg2
+import pyarrow as pa
+import pyarrow.parquet as pq
+from datetime import datetime, timezone
 
-# =======================
-# CONFIGURATION
-# =======================
+# ==============================
+# CONFIG
+# ==============================
+OUTPUT_DIR = "parquet_export"
+TABLE_NAME = "sensor_data"
+CHUNK_ROWS = 100_000  # Zeilen pro Chunk
+WATERMARK_FILE = "last_watermark.txt"
 
-TENANT_ID = "tenand_id"  # Replace with actual Tenant ID
-CLIENT_ID = "client_id"  # Replace with actual Client ID
-CLIENT_SECRET = "client_secret"  # Replace with actual Client Secret
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-ACCOUNT_URL = "https://onelake.dfs.fabric.microsoft.com"
+# ==============================
+# Fabric Schema Definition
+# ==============================
+FABRIC_SCHEMA = pa.schema([
+    pa.field("id", pa.int64(), nullable=False),
+    pa.field("house_name", pa.string(), nullable=False),
+    pa.field("sensor_path", pa.string(), nullable=False),  # ltree als string
+    pa.field("recorded_at", pa.timestamp('ms'), nullable=False),
+    pa.field("value_numeric", pa.decimal128(12, 4), nullable=True),
+    pa.field("value_text", pa.string(), nullable=True),
+    pa.field("__rowMarker__", pa.string(), nullable=False)
+])
 
-# IMPORTANT:
-FILE_SYSTEM_NAME = "f7624f8d-c8f4-4aaf-90c3-1270d5c37943"  # Workspace ID
+# ==============================
+# Load Watermark
+# ==============================
+if not os.path.exists(WATERMARK_FILE):
+    raise ValueError("No watermark file found. Please create one manually!")
 
-LANDING_ZONE_PATH = (
-    "263f9693-548b-44e3-a59d-dce12e92e5ef/"
-    "Files/LandingZone/sensor_data/"
+with open(WATERMARK_FILE, "r") as f:
+    raw_ts = f.read().strip()
+    try:
+        # ISO 8601 Format
+        last_watermark = datetime.fromisoformat(raw_ts)
+    except ValueError:
+        # PostgreSQL-Style Format "YYYY-MM-DD HH:MM:SS+00"
+        last_watermark = datetime.strptime(raw_ts, "%Y-%m-%d %H:%M:%S%z")
+
+print(f"Last Export unitl: {last_watermark.isoformat()}")
+
+# ==============================
+# DB Connection
+# ==============================
+conn = psycopg2.connect(
+    host="localhost",
+    dbname="db1",
+    user="fabric",
+    password="Kennwort1",
+    port=5432
 )
 
-LOCAL_FOLDER = r"F:\Python\Export sensor_data\parquet_export"
-TRACK_FILE = os.path.join(LOCAL_FOLDER, "uploaded_parquet_files.txt")
+cur = conn.cursor(name="sensor_cursor")  # server-seitiger Cursor
 
-# =======================
-# AUTHENTICATION
-# =======================
+# ==============================
+# Prepare Query
+# ==============================
+cur.execute(f"""
+    SELECT id, house_name, sensor_path::text AS sensor_path,
+           recorded_at, value_numeric, value_text
+    FROM {TABLE_NAME}
+    WHERE recorded_at > %s
+    ORDER BY recorded_at ASC
+""", (last_watermark,))
 
-credential = ClientSecretCredential(
-    tenant_id=TENANT_ID,
-    client_id=CLIENT_ID,
-    client_secret=CLIENT_SECRET
-)
+# ==============================
+# Starting Export
+# ==============================
+file_counter = 1
+max_timestamp = None
+export_time_str = datetime.now().strftime("%Y%m%d-%H%M%S")  # Export-Timestamp for Filenames
 
-service_client = DataLakeServiceClient(
-    account_url=ACCOUNT_URL,
-    credential=credential
-)
+while True:
+    rows = cur.fetchmany(CHUNK_ROWS)
+    if not rows:
+        break
 
-file_system_client = service_client.get_file_system_client(FILE_SYSTEM_NAME)
+    df = pd.DataFrame(rows, columns=[desc[0] for desc in cur.description])
+    if df.empty:
+        continue
 
-# =======================
-# Load already uploaded files
-# =======================
+    # Remember new max_timestamp
+    chunk_max = df["recorded_at"].max()
+    if max_timestamp is None or chunk_max > max_timestamp:
+        max_timestamp = chunk_max
 
-if os.path.exists(TRACK_FILE):
-    with open(TRACK_FILE, "r") as f:
-        uploaded_files = set(line.strip() for line in f.readlines())
+    #add  __rowMarker__
+    df["__rowMarker__"] = "0"
+    df = df[[c for c in df.columns if c != "__rowMarker__"] + ["__rowMarker__"]]
+
+    # PyArrow Table with Schema
+    table = pa.Table.from_pandas(df, schema=FABRIC_SCHEMA, preserve_index=False)
+
+    #  Write parquet file with timestamp and chunk number
+    filename = f"data-export-{export_time_str}-chunk{file_counter}.parquet"
+    pq.write_table(table, os.path.join(OUTPUT_DIR, filename), compression="snappy")
+
+    print(f"Written: {filename} ({len(df)} Rows)")
+    file_counter += 1
+
+cur.close()
+conn.close()
+
+# ==============================
+# Update Watermark
+# ==============================
+if max_timestamp:
+    if isinstance(max_timestamp, datetime):
+        max_timestamp = max_timestamp.astimezone(timezone.utc)
+    with open(WATERMARK_FILE, "w") as f:
+        f.write(max_timestamp.isoformat())
+    print(f"New watermark saved: {max_timestamp.isoformat()}")
 else:
-    uploaded_files = set()
+    print("No new data – Watermark remains unchanged.")
 
-# =======================
-# Upload function
-# =======================
-
-def upload_file(local_path, target_path):
-    file_client = file_system_client.get_file_client(target_path)
-
-    with open(local_path, "rb") as f:
-        file_client.upload_data(f, overwrite=True)
-
-    print(f"✔ Uploaded: {target_path}")
-
-# =======================
-# Main logic – sorted & Parquet only
-# =======================
-
-# Collect only Parquet files
-parquet_files = [
-    f for f in os.listdir(LOCAL_FOLDER)
-    if f.endswith(".parquet")
-]
-
-# Sort numerically (important for Open Mirroring)
-parquet_files.sort()
-
-for file_name in parquet_files:
-    local_file_path = os.path.join(LOCAL_FOLDER, file_name)
-
-    if file_name not in uploaded_files:
-        target_path = LANDING_ZONE_PATH + file_name
-        upload_file(local_file_path, target_path)
-        uploaded_files.add(file_name)
-
-# Update tracking
-with open(TRACK_FILE, "w") as f:
-    for fname in uploaded_files:
-        f.write(fname + "\n")
-
-print("✅ Upload completed – files uploaded in correct order.")
-
+print("Export completed.")
