@@ -1,12 +1,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
-    "type": "KQLDashboard",
-    "displayName": "Strommix Deutschland",
-    "description": "Strommix Deutschland"
+    "type": "Reflex",
+    "displayName": "Power Mix Activator",
+    "description": "Reflex Project created from Trigger Pane"
   },
   "config": {
     "version": "2.0",
-    "logicalId": "826d7745-d554-b717-41da-c668c3c6b585"
+    "logicalId": "d85ff050-c184-8e55-48e2-61b2eb3e461f"
   }
 }
