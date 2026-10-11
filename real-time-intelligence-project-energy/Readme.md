@@ -370,7 +370,7 @@ Queries: `kql/02`–`kql/04`. The complete definition is in `fabric/RealTimeDash
 | Power Mix | Stacked area | Generation by source (10 groups) |
 | Renewable Share – Actual + Forecast | Line | Actual share and signal incl. forecast |
 | Load and Residual Load | Line | Consumption and the part not covered by wind and solar |
-| Cross-Border Flows by Country | Bar | Import/export per neighbouring country |
+| Cross-Border Flows by Country (MW) | Bar | Import/export per neighbouring country in MW (small flows stay visible) |
 | Net Import over Time | Line | Net exchange over the selected time range |
 | Data sources | Markdown | Attribution |
 
