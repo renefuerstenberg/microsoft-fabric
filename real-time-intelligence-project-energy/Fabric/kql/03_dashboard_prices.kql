@@ -89,8 +89,9 @@ base
 // Tile P4: Price vs. Renewable Share         Visual: Line chart, 2 Y axes
 //   X: Time
 //   Main Y axis:   Price_ct_kWh          (colour orange, label "Price (ct/kWh)")
-//   Second Y axis: Renewable_Share_Pct   (colour blue,   label "Renewable share (%)")
-//   Reference lines: 0 and 100
+//   Second Y axis: Renewable_Share_Pct   (colour blue,   label "Renewable share (%)",
+//                  min 0, max 160 – the share can exceed 120 % at midday)
+//   Reference lines: 0 (main axis) and 100 (second axis)
 // Description: Exchange price (left axis) compared with the renewable
 //   share of the load (right axis). Shows the relationship: lots of
 //   green power = low price, little green power = high price.
