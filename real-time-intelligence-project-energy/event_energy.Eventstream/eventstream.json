@@ -10,7 +10,7 @@
   "destinations": [
     {
       "id": "39e1bcf7-f111-4864-b27a-e44ba5120516",
-      "name": "eventhouse_frequenz",
+      "name": "eventhouse_frequency",
       "type": "Eventhouse",
       "properties": {
         "dataIngestionMode": "ProcessedIngestion",
@@ -27,12 +27,12 @@
       },
       "inputNodes": [
         {
-          "name": "frequenz"
+          "name": "frequency_fields"
         }
       ],
       "inputSchemas": [
         {
-          "name": "frequenz",
+          "name": "frequency_fields",
           "schema": {
             "columns": [
               {
@@ -60,7 +60,7 @@
     },
     {
       "id": "6725dee0-979d-4a17-9d66-e904120ee0fc",
-      "name": "eventhouse_typen",
+      "name": "eventhouse_energy",
       "type": "Eventhouse",
       "properties": {
         "dataIngestionMode": "ProcessedIngestion",
@@ -77,12 +77,12 @@
       },
       "inputNodes": [
         {
-          "name": "typen"
+          "name": "energy_fields"
         }
       ],
       "inputSchemas": [
         {
-          "name": "typen",
+          "name": "energy_fields",
           "schema": {
             "columns": [
               {
@@ -160,11 +160,11 @@
   ],
   "operators": [
     {
-      "name": "frequenz",
+      "name": "frequency_fields",
       "type": "ManageFields",
       "inputNodes": [
         {
-          "name": "nur_frequenz"
+          "name": "only_frequency"
         }
       ],
       "properties": {
@@ -212,7 +212,7 @@
       },
       "inputSchemas": [
         {
-          "name": "nur_frequenz",
+          "name": "only_frequency",
           "schema": {
             "columns": [
               {
@@ -275,7 +275,7 @@
       ]
     },
     {
-      "name": "nur_frequenz",
+      "name": "only_frequency",
       "type": "Filter",
       "inputNodes": [
         {
@@ -365,7 +365,7 @@
       ]
     },
     {
-      "name": "ohne_frequenz",
+      "name": "without_frequency",
       "type": "Filter",
       "inputNodes": [
         {
@@ -455,11 +455,11 @@
       ]
     },
     {
-      "name": "typen",
+      "name": "energy_fields",
       "type": "ManageFields",
       "inputNodes": [
         {
-          "name": "ohne_frequenz"
+          "name": "without_frequency"
         }
       ],
       "properties": {
@@ -579,7 +579,7 @@
       },
       "inputSchemas": [
         {
-          "name": "ohne_frequenz",
+          "name": "without_frequency",
           "schema": {
             "columns": [
               {
