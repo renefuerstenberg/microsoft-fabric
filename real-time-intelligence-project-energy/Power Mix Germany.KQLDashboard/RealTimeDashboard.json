@@ -1,0 +1,907 @@
+{
+  "schema_version": 86,
+  "pagesNavWidth": 275.50001525878906,
+  "flavor": "RTDashboard_Regular",
+  "changeDetection": {
+    "kind": "liveUpdates",
+    "minRefreshRate": "30s",
+    "fallbackRefreshRate": "1m"
+  },
+  "tiles": [
+    {
+      "id": "fd7977ab-3bf5-4014-92ca-c0b4df718f36",
+      "title": "Traffic Light Now",
+      "visualType": "card",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "62373baa-ce36-4015-8c3a-ec941d66be30"
+      },
+      "description": "Shows how much green power is in the German grid right now. Green = lots of wind and solar power, a good time for the washing machine, dishwasher or EV charging. Yellow = average. Red = lots of coal and gas. Grid congestion = the power grid is currently heavily loaded.",
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "2b7fbd6f-026b-40c3-a9f6-8cf4d4c4679b",
+      "title": "Renewable Share Now (%)",
+      "visualType": "card",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "b061f3c6-e11d-455c-b1c3-8fd90999bfac"
+      },
+      "description": "Share of renewable energy (wind, solar, hydro, biomass) in the current electricity consumption in Germany. Values above 100 % mean that more green power is generated than consumed. The surplus is exported or stored.",
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "a6a1f7c5-1d22-48a1-b566-8de04af583fa",
+      "title": "Net Import/Export Now (GW)",
+      "visualType": "card",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 5,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "daeee44a-112f-4ea4-9730-e88945834777"
+      },
+      "description": "Power exchange with all neighbouring countries combined.\nPositive = Germany imports power, negative = Germany exports power.\nShows the latest completely reported value.\nFor reference: 1 GW is roughly the output of one large power plant unit.",
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "009a452a-00ac-48d5-bf4c-94036062b32f",
+      "title": "Power Mix (15 sources grouped into 10)",
+      "visualType": "stackedarea",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 24,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "20efbaf2-71b6-4983-bc96-77a43e2e5c84"
+      },
+      "description": "Where the electricity comes from over the course of the day, stacked by energy source. The total height equals Germany's total power generation. Typical: solar grows towards midday, wind fluctuates with the weather.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "38583f5e-b394-4bf7-9f40-cb0ee1428226",
+      "title": "Load and Residual Load",
+      "visualType": "line",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 12,
+        "y": 12,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "9c079379-f93b-47bf-8ba7-078f3a566a25"
+      },
+      "description": "Load = total electricity consumption in Germany.\nResidual load = the part of consumption that is not covered by wind and solar and has to come from other power plants (gas, coal, hydro).\nThe lower the residual load, the more wind and solar handle on their own.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "bc2bcf85-a55d-4624-9c01-a0e570a86347",
+      "title": "Renewable Share – Actual + Forecast",
+      "visualType": "line",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "60cbc939-abda-40b2-94cc-c066bdc96771"
+      },
+      "description": "Renewable share of consumption over time, including the forecast for the coming hours. Helps with planning: high values indicate good times for power-hungry appliances. Values above 100 % mean a green power surplus.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "95de8a79-e096-4eb5-9577-c02cc82f6bbd",
+      "title": "Cross-Border Flows by Country (MW)",
+      "visualType": "bar",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 12,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "6fd23d65-732e-4320-9217-a004a1e323d7"
+      },
+      "description": "Power flows between Germany and each neighbouring country. Bars to the right = power flows into Germany (import), bars to the left = power flows into the neighbouring country (export). Shows the latest completely reported point in time.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": "Country",
+        "yColumns": [
+          "MW"
+        ],
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "89d211fe-fefe-4223-971f-0b69a48da9e5",
+      "title": "Net Import over Time",
+      "visualType": "line",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 12,
+        "y": 19,
+        "width": 12,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "16315836-a013-4771-a5fd-10e6125a60f6"
+      },
+      "description": "Total power exchange over the selected time range. Above zero = Germany imports, below zero = Germany exports. Power is often imported at night with little wind and exported at midday with lots of sun.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "be89fd1c-3617-423c-a296-9f87c2e28a8b",
+      "title": "Data Status by Source (current API delay)",
+      "visualType": "table",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 14,
+        "y": 0,
+        "width": 10,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "15e6f64c-5f65-4f7c-95bd-4a32b01427fc"
+      },
+      "description": "Control display: up to when data is available and how delayed it is. The data source publishes some values only after 1–3 hours, which is normal. Only delays of many hours indicate a problem.",
+      "visualOptions": {
+        "table__enableRenderLinks": true,
+        "colorRulesDisabled": true,
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
+    },
+    {
+      "id": "14d5b0c1-ddba-4ee8-bf0a-a746e66d4929",
+      "title": "",
+      "visualType": "markdownCard",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 25,
+        "width": 24,
+        "height": 3
+      },
+      "markdownText": "**Data sources**\n\n- Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n\n*Updated every 5 minutes (prices every 15 minutes) · All times in German local time*",
+      "visualOptions": {}
+    },
+    {
+      "id": "5aa61905-4bbf-4593-b290-af39818a7943",
+      "title": "Grid Frequency Now (Hz)",
+      "description": "Current frequency of the European power grid, measured in Freiburg. The nominal value is 50 Hz. Below that, more power is currently consumed than generated; above that, more is generated than consumed. Delay approx. 2 minutes.",
+      "visualType": "card",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "b2bafdb3-aaf6-4a01-80f8-a5979c084685"
+      },
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "9c0864b2-4830-4cdb-862e-fc95c7cc6cac",
+      "title": "Grid Frequency – Last Hour (per second)",
+      "description": "Grid frequency in one-second resolution. Fluctuations of a few hundredths of a hertz around 50 Hz are normal. Jumps at the full hour often occur when power plants ramp up or down according to their schedules.",
+      "visualType": "line",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 18,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "991ad03f-8e3c-480f-a0b3-2332707b6e8a"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "Hz",
+            "columns": [],
+            "yAxisMaximumValue": 50.1,
+            "yAxisMinimumValue": 49.9,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+              {
+                "id": "a3f2cad6-c59b-4b6a-ae90-9120784624e4",
+                "value": 50
+              }
+            ]
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "5f862446-58ac-482f-bddf-043f838a4b7e",
+      "title": "Grid Frequency – Minimum, Average, Maximum per Minute",
+      "description": "Lowest, average and highest frequency value of each minute in the selected time range. The further apart minimum and maximum are, the more restless the grid was.",
+      "visualType": "line",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 24,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "0fc3714d-aaea-49c2-a4f1-4165bda0773b"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "Hz",
+            "columns": [],
+            "yAxisMaximumValue": 50.1,
+            "yAxisMinimumValue": 49.9,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+              {
+                "id": "de44ac3e-f8fc-4c5b-a577-051ddc574f8f",
+                "value": 50
+              }
+            ]
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "99f7c82d-c6c1-4188-9b18-ea9ef636c0af",
+      "title": "Grid Frequency – Deviations Today",
+      "description": "How often the frequency deviated significantly from 50 Hz today. ±50 mHz is noticeable, ±100 mHz is rare and indicates a larger event in the European grid, such as a power plant outage.",
+      "visualType": "table",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 24,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "977b0a1a-b20d-441e-8d5a-bd666d2cf24f"
+      },
+      "visualOptions": {
+        "table__enableRenderLinks": true,
+        "colorRulesDisabled": true,
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
+    },
+    {
+      "id": "034d2301-5376-408f-ae28-28913ec4ded1",
+      "title": "Electricity Price Now (ct/kWh)",
+      "description": "Current exchange electricity price (day-ahead auction) for the current quarter-hour. Pure wholesale price without grid fees, taxes and levies – the retail price is considerably higher. Negative values mean a power surplus.",
+      "visualType": "card",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "fcb684fd-97ea-4f90-831c-a3cd12fad7ed"
+      },
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "7ed62dee-f9e6-4327-889d-cadbedf183e6",
+      "title": "Electricity Price Today and Tomorrow",
+      "description": "Exchange electricity price in quarter-hour resolution for today and – from about 13:00 – also for tomorrow. Low bars show cheap times, usually at midday with lots of sun or with strong wind. High prices typically occur in the morning and evening.",
+      "visualType": "column",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 24,
+        "height": 4
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "536e6926-8881-442c-b138-dd6b241b9e2e"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "b708f465-77cb-4f04-8959-4689abb6aa20",
+      "title": "Electricity Price vs. Renewable Share",
+      "description": "Exchange electricity price (orange, left axis) and renewable share of consumption (blue, right axis). Lots of green power usually means low prices. Dashed lines: 0 ct (bottom) and 100 % renewables (top).",
+      "visualType": "line",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 24,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "3f0f877b-6730-4cc2-941b-bb5353777c37"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "Price (ct/kWh)",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+              {
+                "id": "5e8c64f3-91e3-4837-8394-730d4d5512cb",
+                "value": 0
+              }
+            ]
+          },
+          "additional": [
+            {
+              "id": "2f584cdf-8eef-4e2e-a859-f17fbc9fe3a4",
+              "columns": [
+                "Renewable_Share_Pct"
+              ],
+              "label": "Renewable share (%)",
+              "yAxisMaximumValue": 120,
+              "yAxisMinimumValue": 0,
+              "yAxisScale": "linear",
+              "horizontalLines": [
+                {
+                  "id": "19310705-4974-4720-a504-aabe00da087a",
+                  "value": 100
+                }
+              ]
+            }
+          ],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {
+          "Price_ct_kWh": "color--(1)",
+          "Renewable_Share_Pct": "color--(0)"
+        },
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": "Time",
+        "yColumns": [
+          "Price_ct_kWh",
+          "Renewable_Share_Pct"
+        ],
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "c2a99901-4c5e-4a36-9043-057b29b4a21c",
+      "title": "Price Overview Today and Tomorrow (ct/kWh)",
+      "description": "Key figures of the exchange electricity price per day: average, lowest and highest price, time of the cheapest price and number of quarter-hours with a negative price. Values for tomorrow appear once the auction is published at around 13:00.",
+      "visualType": "table",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 19,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a0844305-5560-4891-933c-2b9ef53c123e"
+      },
+      "visualOptions": {
+        "table__enableRenderLinks": true,
+        "colorRulesDisabled": true,
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
+    },
+    {
+      "id": "3af9149d-ec61-4383-814c-828ae15fe9b4",
+      "title": "",
+      "visualType": "markdownCard",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 24,
+        "height": 3
+      },
+      "markdownText": "**Data sources**\n\n- Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n\n*Updated every 5 minutes (prices every 15 minutes) · All times in German local time*",
+      "visualOptions": {}
+    }
+  ],
+  "baseQueries": [],
+  "parameters": [
+    {
+      "kind": "duration",
+      "id": "2aad848c-4068-461b-8f0b-2ff0b6424b7c",
+      "displayName": "Time range",
+      "description": "",
+      "beginVariableName": "_startTime",
+      "endVariableName": "_endTime",
+      "defaultValue": {
+        "kind": "dynamic",
+        "count": 1,
+        "unit": "hours"
+      },
+      "showOnPages": {
+        "kind": "all"
+      }
+    }
+  ],
+  "dataSources": [
+    {
+      "id": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0",
+      "kind": "kusto-trident",
+      "clusterUri": "",
+      "databaseArtifactId": "24018399-9b9b-45e2-b363-9d8ec0d8e98c",
+      "database": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+      "workspace": "00000000-0000-0000-0000-000000000000",
+      "name": "eh_1"
+    }
+  ],
+  "pages": [
+    {
+      "name": "Grid Live",
+      "id": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89"
+    },
+    {
+      "id": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "name": "Electricity Prices"
+    },
+    {
+      "name": "Grid Frequency",
+      "id": "3c1d39af-621c-4395-8c4f-2b3f86520eb8"
+    }
+  ],
+  "queries": [
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Traffic light of the current quarter-hour (2 = green ... -1 = grid congestion)\nenergy_latest\n| where endpoint == \"signal\" and series_id == \"signal\" and ts <= now()\n| top 1 by ts desc\n| project [\"Traffic light\"] = case(\n        value == 2,  \"🟢 Green – lots of renewables\",\n        value == 1,  \"🟡 Yellow – average\",\n        value == 0,  \"🔴 Red – little renewables\",\n        value == -1, \"⛔ Red – grid congestion\",\n                     \"unknown\"),\n          [\"As of\"] = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "62373baa-ce36-4015-8c3a-ec941d66be30",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Renewable share of the load in the current quarter-hour\nenergy_latest\n| where endpoint == \"signal\" and series_id == \"share\" and ts <= now()\n| top 1 by ts desc\n| project [\"Renewable share %\"] = round(value, 1)",
+      "id": "b061f3c6-e11d-455c-b1c3-8fd90999bfac",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Net import (positive) / export (negative) of the latest complete quarter-hour\n// Latest completely reported quarter-hour: all 11 countries (at least 30 min\n// before the newest timestamp); if none within 6 h, at least 10 of 11.\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\" and ts == LatestComplete\n| project [\"Net import GW\"] = round(value, 2),\n          [\"As of\"] = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "daeee44a-112f-4ea4-9730-e88945834777",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Public net generation per source, grouped into 10 categories (GW)\nlet Sources = datatable(series_id: string, Source: string)\n[\n    \"fossil_brown_coal_lignite\", \"Lignite\",\n    \"fossil_hard_coal\",          \"Hard coal\",\n    \"fossil_gas\",                \"Natural gas\",\n    \"fossil_oil\",                \"Other fossil\",\n    \"fossil_coal_derived_gas\",   \"Other fossil\",\n    \"waste\",                     \"Other\",\n    \"others\",                    \"Other\",\n    \"geothermal\",                \"Other\",\n    \"biomass\",                   \"Biomass\",\n    \"hydro_run_of_river\",        \"Hydro\",\n    \"hydro_water_reservoir\",     \"Hydro\",\n    \"hydro_pumped_storage\",      \"Pumped storage\",\n    \"wind_offshore\",             \"Wind offshore\",\n    \"wind_onshore\",              \"Wind onshore\",\n    \"solar\",                     \"Solar\"\n];\nenergy_latest\n| where endpoint == \"public_power\" and ts between (_startTime .. _endTime)\n| join kind=inner Sources on series_id\n| summarize GW = round(sum(value) / 1000, 2)\n    by Time = datetime_utc_to_local(ts, \"Europe/Berlin\"), Source\n| order by Time asc",
+      "id": "20efbaf2-71b6-4983-bc96-77a43e2e5c84",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Load and residual load (= load minus wind and solar) in GW\nenergy_latest\n| where endpoint == \"public_power\"\n    and series_id in (\"load\", \"residual_load\")\n    and ts between (_startTime .. _endTime)\n| project Time = datetime_utc_to_local(ts, \"Europe/Berlin\"),\n          Series = iff(series_id == \"load\", \"Load\", \"Residual load\"),\n          GW = round(value / 1000, 2)\n| order by Time asc",
+      "id": "9c079379-f93b-47bf-8ba7-078f3a566a25",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Renewable share: actual generation data plus signal incl. forecast (up to 24 h ahead)\nunion\n    (energy_latest\n     | where endpoint == \"public_power\" and series_id == \"renewable_share_of_load\"\n     | extend Series = \"Actual (generation data)\"),\n    (energy_latest\n     | where endpoint == \"signal\" and series_id == \"share\"\n     | extend Series = \"Signal incl. forecast\")\n| where ts between (_startTime .. now() + 24h)\n| project Time = datetime_utc_to_local(ts, \"Europe/Berlin\"), Series, Percent = round(value, 1)\n| order by Time asc",
+      "id": "60cbc939-abda-40b2-94cc-c066bdc96771",
+      "usedVariables": [
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Cross-border flows per neighbour country in MW (positive = import into Germany)\nlet Countries = datatable(series_id: string, Country: string)\n[\n    \"austria\", \"Austria\", \"belgium\", \"Belgium\", \"czech_republic\", \"Czech Republic\",\n    \"denmark\", \"Denmark\", \"france\", \"France\", \"luxembourg\", \"Luxembourg\",\n    \"netherlands\", \"Netherlands\", \"norway\", \"Norway\", \"poland\", \"Poland\",\n    \"sweden\", \"Sweden\", \"switzerland\", \"Switzerland\"\n];\n// Latest completely reported quarter-hour: all 11 countries (at least 30 min\n// before the newest timestamp); if none within 6 h, at least 10 of 11.\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and ts == LatestComplete\n| join kind=inner Countries on series_id\n| project Country, MW = round(value * 1000, 0)\n| order by MW desc",
+      "id": "6fd23d65-732e-4320-9217-a004a1e323d7",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Net import over time; incomplete recent quarter-hours are cut off\n// Latest completely reported quarter-hour: all 11 countries (at least 30 min\n// before the newest timestamp); if none within 6 h, at least 10 of 11.\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\"\n    and ts between (_startTime .. _endTime) and ts <= LatestComplete\n| project Time = datetime_utc_to_local(ts, \"Europe/Berlin\"), [\"Net import GW\"] = round(value, 2)\n| order by Time asc",
+      "id": "16315836-a013-4771-a5fd-10e6125a60f6",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// How current the data is per source (Energy-Charts publishes with a delay)\nenergy_latest\n| where ts <= now()\n| summarize LatestValue = max(ts), LatestRequest = max(generated_at) by endpoint\n| project Source = endpoint,\n          [\"Data until\"] = datetime_utc_to_local(LatestValue, \"Europe/Berlin\"),\n          [\"Delay (min)\"] = datetime_diff(\"minute\", now(), LatestValue),\n          [\"API as of\"] = datetime_utc_to_local(LatestRequest, \"Europe/Berlin\")",
+      "id": "15e6f64c-5f65-4f7c-95bd-4a32b01427fc",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Latest grid frequency value\nGridFrequency()\n| top 1 by ts desc\n| project [\"Frequency (Hz)\"] = round(hz, 3),\n          [\"Deviation (mHz)\"] = deviation_mhz,\n          [\"As of\"] = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "b2bafdb3-aaf6-4a01-80f8-a5979c084685",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Grid frequency per second, last hour\nGridFrequency()\n| where ts > ago(1h)\n| project Time = datetime_utc_to_local(ts, \"Europe/Berlin\"), [\"Frequency (Hz)\"] = hz\n| order by Time asc",
+      "id": "991ad03f-8e3c-480f-a0b3-2332707b6e8a",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Minimum / average / maximum frequency per minute\nfrequency_1min\n| where ts between (_startTime .. _endTime)\n| project Time = datetime_utc_to_local(ts, \"Europe/Berlin\"),\n          [\"Minimum\"] = round(hz_min, 3),\n          [\"Average\"] = round(hz_avg, 3),\n          [\"Maximum\"] = round(hz_max, 3)\n| order by Time asc",
+      "id": "0fc3714d-aaea-49c2-a4f1-4165bda0773b",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Frequency statistics for the current local calendar day\nlet today = datetime_local_to_utc(startofday(datetime_utc_to_local(now(), \"Europe/Berlin\")), \"Europe/Berlin\");\nGridFrequency()\n| where ts >= today\n| summarize [\"Seconds measured\"] = count(),\n            [\"> ±50 mHz (s)\"] = countif(abs(deviation_mhz) > 50),\n            [\"> ±100 mHz (s)\"] = countif(abs(deviation_mhz) > 100),\n            [\"Lowest (Hz)\"] = round(min(hz), 3),\n            [\"Highest (Hz)\"] = round(max(hz), 3),\n            [\"Max deviation (mHz)\"] = max(abs(deviation_mhz))",
+      "id": "977b0a1a-b20d-441e-8d5a-bd666d2cf24f",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Day-ahead price of the current quarter-hour (EUR/MWh / 10 = ct/kWh)\nenergy_latest\n| where endpoint == \"price\" and ts <= now()\n| top 1 by ts desc\n| project [\"Price now (ct/kWh)\"] = round(value / 10, 2),\n          [\"As of\"] = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "fcb684fd-97ea-4f90-831c-a3cd12fad7ed",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Day-ahead prices for the whole calendar day today and (from ~13:00) tomorrow\nlet today = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nenergy_latest\n| where endpoint == \"price\"\n| extend Time = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| where Time >= today and Time < today + 2d\n| project Time,\n          Day = iff(Time < today + 1d, \"Today\", \"Tomorrow\"),\n          [\"ct/kWh\"] = round(value / 10, 2)\n| order by Time asc",
+      "id": "536e6926-8881-442c-b138-dd6b241b9e2e",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Price (main axis) vs. renewable share (second axis); wide format for 2 Y axes\nlet price = energy_latest\n    | where endpoint == \"price\" and ts between (_startTime .. _endTime)\n    | project ts, Price_ct_kWh = round(value / 10, 2);\nlet renewables = energy_latest\n    | where endpoint == \"public_power\" and series_id == \"renewable_share_of_load\"\n        and ts between (_startTime .. _endTime)\n    | project ts, Renewable_Share_Pct = round(value, 1);\nprice\n| join kind=fullouter renewables on ts\n| project Time = datetime_utc_to_local(coalesce(ts, ts1), \"Europe/Berlin\"),\n          Price_ct_kWh, Renewable_Share_Pct\n| order by Time asc",
+      "id": "3f0f877b-6730-4cc2-941b-bb5353777c37",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// Daily key figures of the day-ahead price (ct/kWh)\n// arg_min is joined separately because it cannot be combined with other aggregates\nlet today = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet base = energy_latest\n    | where endpoint == \"price\"\n    | extend Time = datetime_utc_to_local(ts, \"Europe/Berlin\")\n    | where Time >= today and Time < today + 2d\n    | extend Day = iff(Time < today + 1d, \"Today\", \"Tomorrow\");\nbase\n| summarize AvgPrice = avg(value), MaxPrice = max(value), Negative = countif(value < 0) by Day\n| join kind=inner (base | summarize arg_min(value, Time) by Day) on Day\n| project Day,\n          [\"Avg\"] = round(AvgPrice / 10, 2),\n          [\"Min\"] = round(value / 10, 2),\n          [\"Cheapest at\"] = format_datetime(Time, \"HH:mm\"),\n          [\"Max\"] = round(MaxPrice / 10, 2),\n          [\"Negative ¼h\"] = Negative\n| order by Day asc",
+      "id": "a0844305-5560-4891-933c-2b9ef53c123e",
+      "usedVariables": []
+    }
+  ],
+  "embeddedApps": []
+}

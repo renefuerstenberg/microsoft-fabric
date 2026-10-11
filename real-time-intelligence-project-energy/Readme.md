@@ -1,0 +1,592 @@
+# Power Mix Germany – Real-Time Intelligence with Energy-Charts
+
+A real-time data pipeline for the German power grid built on **Microsoft Fabric Real-Time
+Intelligence**. Azure Functions poll the public Energy-Charts API of Fraunhofer ISE. A Fabric
+Eventstream routes the events into an Eventhouse, where the data is kept permanently. A
+Real-Time Dashboard and Activator alerts sit on top of the Eventhouse.
+
+| What | Detail |
+|---|---|
+| Data | Power generation per source, renewable share incl. forecast, cross-border flows, day-ahead prices, grid frequency per second |
+| Latency | ~2 min (frequency), 15–90 min (generation data, set by the source), prices for tomorrow from ~13:00 |
+| Retention | Permanent (36,500 days), recoverability enabled |
+| Fabric workspace | RTI Energy Germany |
+| Licence of the data | CC BY 4.0 (see [Licences and attribution](#licences-and-attribution)) |
+
+---
+
+## Contents
+
+1. [Features](#features)
+2. [Architecture](#architecture)
+3. [Repository structure](#repository-structure)
+4. [Data source: Energy-Charts API](#data-source-energy-charts-api)
+5. [Azure Functions](#azure-functions)
+6. [Event format](#event-format)
+7. [Fabric Eventstream](#fabric-eventstream)
+8. [Eventhouse data model](#eventhouse-data-model)
+9. [Real-Time Dashboard](#real-time-dashboard)
+10. [Activator alerts](#activator-alerts)
+11. [Setup from scratch](#setup-from-scratch)
+12. [Local development and deployment](#local-development-and-deployment)
+13. [Git integration of the Fabric items](#git-integration-of-the-fabric-items)
+14. [Data quality and known characteristics](#data-quality-and-known-characteristics)
+15. [Monitoring and troubleshooting](#monitoring-and-troubleshooting)
+16. [Roadmap](#roadmap)
+17. [Licences and attribution](#licences-and-attribution)
+
+---
+
+## Features
+
+- **Live power mix**: public net generation in Germany per energy source (15-minute values),
+  grouped into 10 categories.
+- **Traffic light**: Energy-Charts signal (green / yellow / red / grid congestion) and the
+  renewable share of the load, including a forecast for the coming hours.
+- **Cross-border flows**: physical power exchange with all 11 neighbouring countries and the
+  net import/export, with a completeness rule for late-reporting countries.
+- **Electricity prices**: day-ahead exchange price for the bidding zone DE-LU per
+  quarter-hour, for today and – once the auction is published – tomorrow.
+- **Grid frequency**: Continental European grid frequency per second, measured in Freiburg,
+  plus minute aggregates for long-term analyses.
+- **Late corrections handled**: preliminary values are corrected automatically when the
+  source publishes newer figures.
+- **Seven e-mail alerts**: green power, grid congestion, high export, negative prices
+  (now / tomorrow), frequency deviations and pipeline outages.
+- **Everything in Git**: function code, KQL scripts, and the Fabric items through Fabric Git
+  integration.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    API["Energy-Charts API v2<br/>(Fraunhofer ISE)"]
+
+    subgraph Azure["Azure Function App (Python 3.13, Flex Consumption)"]
+        F1["EnergyIngest<br/>every 5 min"]
+        F2["EnergyBackfill<br/>every 3 h"]
+        F3["EnergyPriceIngest<br/>every 15 min"]
+        F4["FrequencyIngest<br/>every minute"]
+    end
+
+    subgraph Fabric["Microsoft Fabric – workspace RTI Energy Germany"]
+        ES["Eventstream<br/>custom endpoint"]
+        FA["Filter endpoint != frequency<br/>+ Manage fields"]
+        FB["Filter endpoint == frequency<br/>+ Manage fields (value → hz)"]
+        subgraph EH["Eventhouse – KQL database eh_1"]
+            T1[("energy_raw")]
+            T2[("frequency_raw")]
+            MV1["MV energy_latest"]
+            MV2["MV frequency_1s"]
+            MV3["MV frequency_1min"]
+            FN["function GridFrequency()"]
+        end
+        DB["Real-Time Dashboard<br/>3 pages"]
+        QS["KQL Queryset<br/>alert queries"]
+        ACT["Activator<br/>7 rules → e-mail"]
+    end
+
+    API --> F1 & F2 & F3 & F4
+    F1 & F2 & F3 & F4 -- "Event Hubs protocol (JSON)" --> ES
+    ES --> FA --> T1 --> MV1
+    ES --> FB --> T2 --> MV2 --> FN
+    T2 --> MV3
+    MV1 & FN & MV3 --> DB
+    MV1 & FN & T1 --> QS --> ACT
+```
+
+Plain-text version:
+
+```
+Energy-Charts API v2 ──> Azure Functions (Python 3.13, Flex Consumption)
+                              │  Event Hubs protocol (JSON)
+                              ▼
+                     Fabric Eventstream (custom endpoint)
+                       │ endpoint != "frequency"          │ endpoint == "frequency"
+                       ▼                                  ▼
+               Eventhouse eh_1: energy_raw        Eventhouse eh_1: frequency_raw
+                       │                                  │
+               MV energy_latest                   MV frequency_1s / frequency_1min
+                       │                          function GridFrequency()
+                       └──────────────┬───────────────────┘
+                                      ▼
+              Real-Time Dashboard (3 pages) · Activator (7 rules)
+```
+
+**Design decisions**
+
+| Decision | Reason |
+|---|---|
+| One event per value (long format) | Works the same for every endpoint and series; new series need no schema change. |
+| Append-only raw tables + materialized views | Late corrections are simply sent again; `arg_max(generated_at)` always returns the latest version. Raw history is kept for auditing. |
+| One Eventstream, routed by filter | One connection string for all functions; frequency data (86,400 rows/day) is kept separate from the 15-minute data. |
+| Backfill function instead of a longer look-back | Keeps the 5-minute runs small and fast while still capturing corrections that arrive hours later. |
+| Timer schedules offset by seconds | Avoids parallel requests against the API rate limit (2 requests/min per endpoint). |
+
+---
+
+## Repository structure
+
+```
+energy-ingest/
+├── function_app.py               Azure Functions (4 timer triggers)
+├── requirements.txt              Python dependencies
+├── host.json                     Functions host configuration
+├── local.settings.json.example   Template for local settings (copy to local.settings.json)
+├── .funcignore / .gitignore
+├── kql/
+│   ├── 00_migration_to_english.kql   One-time switch of an existing installation to English names
+│   ├── 01_setup_eventhouse.kql       Table energy_raw, MV energy_latest, policies, checks
+│   ├── 02_dashboard_grid_live.kql    Dashboard page "Grid Live" (tiles + descriptions)
+│   ├── 03_dashboard_prices.kql       Dashboard page "Electricity Prices"
+│   ├── 04_grid_frequency.kql         Table frequency_raw, MVs, GridFrequency(), checks, page "Grid Frequency"
+│   └── 05_activator_alerts.kql       Queries and settings of all 7 Activator rules
+├── fabric/                       Reference copies of the Fabric item definitions (from Fabric Git)
+│   ├── RealTimeDashboard.json
+│   ├── RealTimeQueryset.json
+│   ├── ReflexEntities.json
+│   └── eventstream.json
+└── README.md
+```
+
+`local.settings.json` contains the connection string and is never committed.
+`kql/`, `fabric/` and `README.md` are excluded from the function deployment by `.funcignore`.
+
+---
+
+## Data source: Energy-Charts API
+
+Base URL: `https://api.energy-charts.info` (API version 2). No key is required.
+
+| Endpoint | Content | Resolution | Time parameters used |
+|---|---|---|---|
+| `/v2/public_power` | Public net generation per source, load, residual load, renewable share | 15 min, MW | ISO `start`/`end` (UTC) |
+| `/v2/signal` | Traffic light (−1…2) and renewable share incl. forecast | 15 min | none (returns today + forecast) |
+| `/v2/cbpf` | Cross-border physical flows per neighbour country + sum | 15 min, GW | day format `YYYY-MM-DD` (local time) |
+| `/v2/price` | Day-ahead price, bidding zone `bzn=DE-LU` | 15 min, EUR/MWh | day format, today … tomorrow |
+| `/v2/frequency` | Grid frequency, region `DE-Freiburg` (currently the only one) | 1 s, Hz | ISO `start`/`end` (UTC), max. 3 days |
+
+**Rate limits**: 2 requests per minute per endpoint (signal: 20/min). HTTP 429 responses
+contain a `Retry-After` header. The functions wait up to 60 seconds; longer waits are skipped
+until the next run.
+
+**Response format** (v2 envelope, shortened):
+
+```json
+{
+  "schema_version": "2.0",
+  "endpoint": "public_power",
+  "country": "de",
+  "unit": "MW",
+  "generated_at": "2026-10-11T09:30:12+00:00",
+  "available_from": "...", "available_until": "...",
+  "series": [{ "id": "solar", "name": "Solar", "unit": "MW" }],
+  "data": [
+    { "timestamp": "2026-10-11T11:00:00+02:00", "values": { "solar": 31250.4, "wind_onshore": 8120.0 } }
+  ]
+}
+```
+
+---
+
+## Azure Functions
+
+All functions live in `function_app.py` (Python programming model v2) and share these helpers:
+
+| Helper | Purpose |
+|---|---|
+| `fetch_api()` | GET request with 2 attempts; handles 404 (no data), 429 (Retry-After), 5xx (retry after 5 s) |
+| `envelope_to_events()` | Flattens a v2 response into one event per timestamp and series; converts timestamps to UTC; skips `null` values; sets `is_forecast` |
+| `send_to_eventstream()` | Sends events in batches with `EventHubProducerClient` (connection string incl. `EntityPath`) |
+
+### Functions and schedules (UTC, NCRONTAB with seconds)
+
+| Function | Schedule | What it loads | Why |
+|---|---|---|---|
+| **EnergyIngest** | `30 */5 * * * *` | `public_power` (last 6 h), `signal` (today + forecast), `cbpf` (yesterday + today) | Main ingest. cbpf always covers yesterday + today because it is published with a delay of up to 5 h+. If the day-range request fails, it falls back to today only. |
+| **EnergyBackfill** | `45 2 */3 * * *` | `public_power` + `cbpf` of the last 3 days, `frequency` of the last 4 h | Energy-Charts corrects values for many hours after the first publication. The backfill re-sends them; `energy_latest` keeps the newest version. It also closes frequency gaps after restarts. |
+| **EnergyPriceIngest** | `15 1/15 * * * *` | `price` DE-LU, today + tomorrow | Tomorrow's prices appear once the auction is published (~13:00 local time) and are in the Eventhouse at most 15 minutes later. |
+| **FrequencyIngest** | `50 * * * * *` | `frequency`, overlapping 30-min window | Sends only seconds that have not been sent yet (in-memory set per instance). After a restart the window is sent again; duplicates are removed by `frequency_1s`. |
+
+The seconds offsets (30 / 45 / 15 / 50) keep the functions from calling the API at the same
+moment, and keep EnergyIngest away from the OpenSky function in the same app.
+
+### Configuration (app settings)
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `EVENTSTREAM_CONNECTION_STRING` | – (required) | Connection string of the Eventstream custom endpoint, incl. `EntityPath` |
+| `ENERGY_COUNTRY` | `de` | Country for public_power / signal / cbpf |
+| `ENERGY_LOOKBACK_HOURS` | `6` | Look-back window of EnergyIngest for public_power |
+| `ENERGY_BACKFILL_DAYS` | `3` | Days reloaded by EnergyBackfill |
+| `ENERGY_BIDDING_ZONE` | `DE-LU` | Bidding zone for prices |
+| `FREQUENCY_REGION` | `DE-Freiburg` | Measurement point of the grid frequency |
+| `FREQUENCY_WINDOW_MINUTES` | `30` | Overlapping window of FrequencyIngest |
+| `FREQUENCY_BACKFILL_HOURS` | `4` | Frequency hours reloaded by EnergyBackfill |
+
+All settings except the connection string are optional; the defaults are built into the code.
+
+### Typical load
+
+| Function | Runs/day | Events per run (approx.) |
+|---|---|---|
+| EnergyIngest | 288 | ~2,900–3,000 |
+| EnergyBackfill | 8 | ~25,000 + ~14,400 frequency seconds |
+| EnergyPriceIngest | 96 | 96–192 |
+| FrequencyIngest | 1,440 | ~60 (first run after a restart: ~1,800) |
+
+---
+
+## Event format
+
+Every event sent to the Eventstream has the same flat JSON structure:
+
+```json
+{
+  "endpoint": "public_power",
+  "country": "de",
+  "ts": "2026-10-11T09:00:00Z",
+  "series_id": "solar",
+  "series_name": "Solar",
+  "value": 31250.4,
+  "unit": "MW",
+  "is_forecast": false,
+  "generated_at": "2026-10-11T09:30:12Z"
+}
+```
+
+| Field | Type | Meaning |
+|---|---|---|
+| `endpoint` | string | `public_power`, `signal`, `cbpf`, `price` or `frequency` |
+| `country` | string | Country code from the API (e.g. `de`) |
+| `ts` | ISO 8601 UTC | Start of the interval (or the second for frequency) |
+| `series_id` | string | Series key, e.g. `wind_onshore`, `france`, `sum`, `share`, `signal`, `frequency` |
+| `series_name` | string | Display name from the API |
+| `value` | number | Value in the unit below |
+| `unit` | string | `MW`, `GW`, `%`, `EUR/MWh`, `Hz`, … |
+| `is_forecast` | bool | `true` if the interval was in the future at request time |
+| `generated_at` | ISO 8601 UTC | Creation time of the API response – used to pick the latest version |
+
+---
+
+## Fabric Eventstream
+
+The Eventstream receives all events through **one custom endpoint** and splits them into two
+paths. Both destinations use the mode **"Event processing before ingestion"**.
+
+| Path | Filter | Manage fields | Destination table |
+|---|---|---|---|
+| Energy | `endpoint` **not equals** `frequency` | `ts`, `generated_at` → DateTime; `value` → Double; other fields unchanged | `energy_raw` |
+| Frequency | `endpoint` **equals** `frequency` | `ts`, `generated_at` → DateTime; `value` → Double, renamed to **`hz`**; other fields dropped | `frequency_raw` |
+
+Notes:
+
+- *Manage fields* offers no Boolean type, so `is_forecast` arrives as a string and the
+  Eventhouse converts it to `bool`. Fabric shows a schema-mismatch warning for this column;
+  the data is ingested correctly.
+- The custom endpoint's connection string is stored in the Function App
+  (`EVENTSTREAM_CONNECTION_STRING`). Renaming or recreating the source can create a new
+  connection string – update the app setting in that case.
+
+---
+
+## Eventhouse data model
+
+KQL database **eh_1**. Setup scripts: `kql/01_setup_eventhouse.kql` and `kql/04_grid_frequency.kql`.
+
+### Tables
+
+**`energy_raw`** – append-only, one row per value and API response
+
+| Column | Type |
+|---|---|
+| endpoint | string |
+| country | string |
+| ts | datetime |
+| series_id | string |
+| series_name | string |
+| value | real |
+| unit | string |
+| is_forecast | bool |
+| generated_at | datetime |
+
+**`frequency_raw`** – append-only, one row per second (duplicates possible)
+
+| Column | Type |
+|---|---|
+| ts | datetime |
+| hz | real |
+| generated_at | datetime |
+
+### Materialized views and functions
+
+| Object | Definition | Purpose |
+|---|---|---|
+| `energy_latest` | `energy_raw \| summarize arg_max(generated_at, value, unit, series_name, is_forecast) by endpoint, country, series_id, ts` | Latest version of every value – **all tiles and alerts read from here** |
+| `frequency_1s` | `frequency_raw \| summarize hz = take_any(hz) by ts` | Deduplicated second values |
+| `frequency_1min` | `min / avg / max(hz)` and `samples = count()` per minute | Fast long-term analyses |
+| `GridFrequency()` | `frequency_1s \| project ts, hz, deviation_mhz = round((hz - 50) * 1000, 1)` | Convenience function with the deviation from 50 Hz in mHz |
+
+### Policies
+
+| Object | Retention | Hot cache |
+|---|---|---|
+| energy_raw | 36,500 days, recoverability enabled | 30 days |
+| energy_latest | 36,500 days | 365 days |
+| frequency_raw | 36,500 days | 7 days |
+| frequency_1s | 36,500 days | default |
+| frequency_1min | 36,500 days | 365 days |
+
+### Useful series IDs
+
+| Endpoint | Series IDs |
+|---|---|
+| public_power | `solar`, `wind_onshore`, `wind_offshore`, `biomass`, `hydro_run_of_river`, `hydro_water_reservoir`, `hydro_pumped_storage`, `fossil_brown_coal_lignite`, `fossil_hard_coal`, `fossil_gas`, `fossil_oil`, `fossil_coal_derived_gas`, `waste`, `geothermal`, `others`, `load`, `residual_load`, `renewable_share_of_load`, … |
+| signal | `signal` (−1 = grid congestion, 0 = red, 1 = yellow, 2 = green), `share` (%) |
+| cbpf | `austria`, `belgium`, `czech_republic`, `denmark`, `france`, `luxembourg`, `netherlands`, `norway`, `poland`, `sweden`, `switzerland`, `sum` (positive = import) |
+| price | one series with the day-ahead price in EUR/MWh (÷ 10 = ct/kWh) |
+
+Run `energy_latest | summarize count() by endpoint, series_id, series_name, unit` for the
+complete list.
+
+---
+
+## Real-Time Dashboard
+
+Parameter **Time range** (`_startTime` / `_endTime`) is shown on all pages. Recommended
+default: last 24 hours. All times are displayed in local time (Europe/Berlin).
+Queries: `kql/02`–`kql/04`. The complete definition is in `fabric/RealTimeDashboard.json`.
+
+### Page 1 – Grid Live
+
+| Tile | Visual | Shows |
+|---|---|---|
+| Traffic Light Now | Stat | Current traffic light of the Energy-Charts signal |
+| Renewable Share Now (%) | Stat | Renewable share of the current load |
+| Net Import/Export Now (GW) | Stat | Net exchange with all neighbours, latest complete quarter-hour |
+| Data Status by Source | Table | Data available until, delay in minutes, API timestamp |
+| Power Mix | Stacked area | Generation by source (10 groups) |
+| Renewable Share – Actual + Forecast | Line | Actual share and signal incl. forecast |
+| Load and Residual Load | Line | Consumption and the part not covered by wind and solar |
+| Cross-Border Flows by Country | Bar | Import/export per neighbouring country |
+| Net Import over Time | Line | Net exchange over the selected time range |
+| Data sources | Markdown | Attribution |
+
+### Page 2 – Electricity Prices
+
+| Tile | Visual | Shows |
+|---|---|---|
+| Electricity Price Now (ct/kWh) | Stat | Day-ahead price of the current quarter-hour |
+| Price Overview Today and Tomorrow | Table | Average, min (with time), max, number of negative quarter-hours |
+| Electricity Price Today and Tomorrow | Column | Price per quarter-hour, today and tomorrow in two colours |
+| Electricity Price vs. Renewable Share | Line, 2 Y axes | Price (orange, left) vs. renewable share (blue, right) |
+| Data sources | Markdown | Attribution |
+
+### Page 3 – Grid Frequency
+
+| Tile | Visual | Shows |
+|---|---|---|
+| Grid Frequency Now (Hz) | Stat | Latest value and deviation in mHz |
+| Grid Frequency – Last Hour | Line (49.9–50.1 Hz, reference 50) | Second values of the last hour |
+| Grid Frequency – Min, Avg, Max per Minute | Line | Frequency band over the selected time range |
+| Grid Frequency – Deviations Today | Table | Seconds beyond ±50 / ±100 mHz, extremes |
+
+**Reading the grid frequency**
+
+| Deviation from 50 Hz | Meaning |
+|---|---|
+| up to ±20 mHz | normal operation |
+| ±20 to ±50 mHz | normal, somewhat restless – typical in the evening and at full hours |
+| beyond ±50 mHz | noticeable |
+| beyond ±100 mHz | rare – larger event in the European grid |
+| ±200 mHz | frequency containment reserve fully activated |
+
+---
+
+## Activator alerts
+
+All rules live in one Activator item and use queries from the KQL queryset
+(`kql/05_activator_alerts.kql`, `fabric/ReflexEntities.json`).
+
+| # | Rule | Field | Condition | Interval |
+|---|---|---|---|---|
+| 1 | Lots of Green Power | `TrafficLight` | increases above 1 | 15 min |
+| 2 | Grid Congestion | `TrafficLight` | decreases below 0 | 15 min |
+| 3 | High Export | `NetImport_GW` | decreases below −5 | 15 min |
+| 4 | Data Outage | `MinutesWithoutData` | increases above 30 | 5 min |
+| 5 | Negative Prices Tomorrow | `NegativeQuarterHoursTomorrow` | increases above 0 | 15 min |
+| 6 | Price Negative Now | `Price_ct_kWh` | decreases below 0 | 15 min |
+| 7 | Frequency Deviation | `MaxDeviation_mHz` | increases above 100 | 5 min |
+
+How the rules work:
+
+- Every query ends with `| render card`. Only then does Activator offer
+  *"On each event when"* with numeric conditions.
+- *Increases above* / *Decreases below* fire only when the threshold is **crossed**, not on
+  every run.
+- A rule can fire once right after it is created or changed, if the current value already
+  meets the condition.
+- The e-mail texts use the query columns as placeholders (`@RenewableShare`, `@AsOf`, …).
+
+---
+
+## Setup from scratch
+
+1. **Eventhouse**: create an Eventhouse with the KQL database `eh_1`.
+2. **Tables and views**: run `kql/01_setup_eventhouse.kql` (blocks 1–6) and the setup part
+   of `kql/04_grid_frequency.kql` (E1–E5), one block at a time.
+3. **Eventstream**: create an Eventstream with a **custom endpoint** source. Copy the
+   Event Hub connection string (incl. `EntityPath`).
+4. **Routing**: add both paths as described in [Fabric Eventstream](#fabric-eventstream),
+   each with a filter, *Manage fields* and an Eventhouse destination in
+   "Event processing before ingestion" mode. Publish.
+5. **Function App**: create a Function App (Python 3.13, Flex Consumption) and add the app
+   setting `EVENTSTREAM_CONNECTION_STRING`. Deploy (see below).
+6. **Check the data flow**: run the checks in `01_setup_eventhouse.kql` and
+   `04_grid_frequency.kql`. Optionally start `EnergyBackfill` manually to load the last
+   3 days immediately.
+7. **Dashboard**: create a Real-Time Dashboard with eh_1 as the data source and the tiles
+   from `kql/02`–`kql/04`, or import `fabric/RealTimeDashboard.json` through Git.
+8. **Alerts**: create a KQL queryset with the queries from `kql/05_activator_alerts.kql`,
+   then *Add alert* for every rule, all saved to the same Activator item.
+
+`kql/00_migration_to_english.kql` is only needed for installations that still use the
+earlier German object names.
+
+---
+
+## Local development and deployment
+
+**Prerequisites**: Python 3.13, Azure Functions Core Tools v4, Azure CLI, and Azurite for
+the local storage emulator.
+
+```bash
+cd energy-ingest
+python3.13 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+cp local.settings.json.example local.settings.json   # then add the connection string
+func start                                           # run locally
+```
+
+Start a single function manually (locally or in Azure):
+
+```bash
+# local
+curl -X POST http://localhost:7071/admin/functions/EnergyBackfill \
+     -H "Content-Type: application/json" -d '{}'
+
+# Azure (master key from Function App → App keys)
+curl -X POST "https://<app>.azurewebsites.net/admin/functions/EnergyBackfill" \
+     -H "x-functions-key: <master-key>" -H "Content-Type: application/json" -d '{}'
+```
+
+Deploy:
+
+```bash
+az login
+func azure functionapp publish <function-app-name>
+```
+
+After deployment, check **Function App → Log stream** for messages such as
+`FrequencyIngest: 60 new second values sent (available until …)`.
+
+---
+
+## Git integration of the Fabric items
+
+The workspace is connected to Git (Fabric *Workspace settings → Git integration*). Supported
+here: Eventstream, Eventhouse / KQL database, KQL queryset, Real-Time Dashboard and Activator
+(preview).
+
+| Item | File in the repo | Safe to edit in Git? |
+|---|---|---|
+| Real-Time Dashboard | `<name>.KQLDashboard/RealTimeDashboard.json` | Yes – titles, descriptions, queries, visual options. Never change `id`, `pageId`, `queryId`. |
+| KQL queryset | `<name>.KQLQueryset/RealTimeQueryset.json` | Yes – tab content and titles. Keep tab IDs (Activator refers to them). |
+| Activator | `<name>.Reflex/ReflexEntities.json` | With care (preview) – query text, rule names, field names, e-mail texts. Keep all `uniqueIdentifier` values. |
+| Eventstream | `<name>.Eventstream/eventstream.json` | With care – the live data flow is republished. Do not rename the custom endpoint source. |
+| KQL database | schema files | Prefer running schema changes as KQL commands in a queryset. |
+
+Workflow: edit the file → commit and push → in Fabric *Source control → Update all* → check
+the item. To undo, revert the commit and update again.
+
+---
+
+## Data quality and known characteristics
+
+| Topic | Behaviour | Handling |
+|---|---|---|
+| Late corrections (public_power, cbpf) | Values change for many hours after first publication (measured: beyond 6 h) | EnergyBackfill every 3 h for the last 3 days; `energy_latest` keeps the newest version |
+| Incomplete cross-border data | The newest quarter-hours contain 0 for countries that have not reported yet; Sweden often reports hours late | Tiles and alerts use the latest timestamp at least 30 min old with all 11 countries reported; fallback to ≥ 10 of 11 if none within 6 h (e.g. cable maintenance = genuine 0) |
+| cbpf with ISO timestamps | Returns HTTP 500 | Day format `YYYY-MM-DD` (local time) is used |
+| Grid frequency gap at midnight UTC | The source delivers `null` for a few seconds up to about a minute every day shortly before 00:00 UTC (e.g. 67 s on 2026-10-10); never published later | Expected, no pipeline error. Gaps are not filled with invented values |
+| Generation data delay | Published 15–90 min after real time, sometimes more | Shown in the *Data Status* tile |
+| Prices for tomorrow | Available after the day-ahead auction, around 13:00 local time | EnergyPriceIngest every 15 min |
+| Renewable share above 100 % | More renewable generation than consumption | Correct; the surplus is exported or stored |
+| Daylight saving time | All data is stored in UTC; display converts to Europe/Berlin | `datetime_utc_to_local()` in every query |
+| Duplicate frequency seconds | After restarts or backfill runs | Removed by `frequency_1s` (`take_any`) |
+
+---
+
+## Monitoring and troubleshooting
+
+**Is data arriving?**
+
+```kql
+energy_raw
+| where ingestion_time() > ago(30m)
+| summarize Rows = count(), ts_empty = countif(isnull(ts)), value_empty = countif(isnull(value)),
+            frequency_misrouted = countif(endpoint == "frequency")
+    by Ingested = bin(ingestion_time(), 5m)
+| order by Ingested desc
+```
+
+Expected: about 2,900–3,000 rows per 5 minutes, all other columns 0.
+
+**How current is the grid frequency?**
+
+```kql
+GridFrequency()
+| summarize Values = count(), To = max(ts), Delay_s = datetime_diff("second", now(), max(ts))
+```
+
+Expected: `Delay_s` about 100–150 seconds.
+
+**Frequency gaps of the last 7 days**: see `kql/04_grid_frequency.kql`. Only the short
+nightly gap before midnight UTC is expected.
+
+**How many values were corrected?**: see `kql/01_setup_eventhouse.kql` (backfill effect).
+
+| Symptom | Likely cause | What to do |
+|---|---|---|
+| Data Outage alert / no new rows | Function App stopped, connection string invalid, Eventstream paused | Check Function App → Log stream; check the Eventstream status; compare the connection string |
+| Log shows `rate limit, Retry-After …` | Too many requests against one endpoint | Usually resolves itself on the next run; avoid running functions manually in quick succession |
+| Log shows `server error 500` for cbpf | Temporary API problem | Fallback to today; EnergyBackfill fills the rest |
+| Cross-border tiles show only a few countries | Recent quarter-hours incomplete | Expected; the completeness rule shows the latest complete timestamp |
+| Frequency gap other than at midnight UTC | Function restart or outage longer than 30 min | Wait for the next EnergyBackfill (every 3 h) or start it manually; compare with the source URL |
+| Tile shows "function not found" | Query still uses an old function name | Update the query to `GridFrequency()` |
+
+---
+
+## Roadmap
+
+- **Fabric Maps**: cross-border flows as a map with arrows per neighbouring country.
+- **OneLake availability**: expose the tables as Delta tables for Power BI (Direct Lake),
+  Lakehouse and notebooks.
+- **Long-term analyses**: monthly power mix, price statistics, frequency events per month.
+- **Neighbouring countries' power mix**: show which energy sources the imported power comes from.
+
+---
+
+## Licences and attribution
+
+| Data | Source | Licence |
+|---|---|---|
+| Generation, signal, cross-border flows, grid frequency | [Energy-Charts.info](https://energy-charts.info), Fraunhofer ISE | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| Day-ahead prices DE-LU | [Bundesnetzagentur \| SMARD.de](https://www.smard.de) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+
+The attribution is shown on every dashboard page (Markdown tile *Data sources*). Keep it when
+publishing screenshots or derived data.

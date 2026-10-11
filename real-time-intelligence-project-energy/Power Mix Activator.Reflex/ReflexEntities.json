@@ -1,0 +1,483 @@
+[
+  {
+    "uniqueIdentifier": "fd54f8fe-cc3f-43ec-bc46-3e7a7dbe02ca",
+    "payload": {
+      "name": "Power Mix Alerts",
+      "description": "Container Description",
+      "type": "kqlQueries"
+    },
+    "type": "container-v1"
+  },
+  {
+    "uniqueIdentifier": "a59736c3-9049-4b2a-8dc4-f03f9bab489b",
+    "payload": {
+      "name": "eh_1 event",
+      "runSettings": {
+        "isStopped": false,
+        "executionIntervalInSeconds": 900
+      },
+      "query": {
+        "queryString": "let ts_now = toscalar(\n    energy_latest\n    | where endpoint == \"signal\" and ts <= now()\n    | summarize max(ts));\nenergy_latest\n| where endpoint == \"signal\" and ts == ts_now\n| summarize TrafficLight = toint(maxif(value, series_id == \"signal\")),\n            RenewableShare = round(maxif(value, series_id == \"share\"), 1)\n    by ts\n| project TrafficLight, RenewableShare, AsOf = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card"
+      },
+      "eventhouseItem": {
+        "itemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemType": "KustoDatabase"
+      },
+      "metadata": {
+        "workspaceId": "2d62e765-a23c-472d-ae33-cbe99497366c",
+        "querySetId": "986ef7c0-333d-432c-b4a8-3cc94c987d56",
+        "queryId": "bd3a01dd-899d-4791-b463-6b50c53e83f8"
+      },
+      "parentContainer": {
+        "targetUniqueIdentifier": "fd54f8fe-cc3f-43ec-bc46-3e7a7dbe02ca"
+      }
+    },
+    "type": "kqlSource-v1"
+  },
+  {
+    "uniqueIdentifier": "a4438d16-6c55-4ae4-96a9-a4b047a74c1a",
+    "payload": {
+      "name": "eh_1 event",
+      "parentContainer": {
+        "targetUniqueIdentifier": "fd54f8fe-cc3f-43ec-bc46-3e7a7dbe02ca"
+      },
+      "definition": {
+        "type": "Event",
+        "instance": "{\"steps\":[{\"id\":\"17adc0b9-f3b8-4ff0-8df5-a4072e45ac2d\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"a59736c3-9049-4b2a-8dc4-f03f9bab489b\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.3.0\"}"
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "77eaf077-af4a-4867-9516-fab85d6a654a",
+    "payload": {
+      "name": "Lots of Green Power",
+      "parentContainer": {
+        "targetUniqueIdentifier": "fd54f8fe-cc3f-43ec-bc46-3e7a7dbe02ca"
+      },
+      "definition": {
+        "type": "Rule",
+        "instance": "{\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.3.0\",\"steps\":[{\"name\":\"FieldsDefaultsStep\",\"id\":\"11af1da5-983f-45a9-b47d-3e2e5b512c5e\",\"rows\":[{\"name\":\"EventSelector\",\"kind\":\"Event\",\"arguments\":[{\"kind\":\"EventReference\",\"type\":\"complex\",\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"a4438d16-6c55-4ae4-96a9-a4b047a74c1a\"}],\"name\":\"event\"}]}]},{\"name\":\"EventDetectStep\",\"id\":\"321a0533-a73b-4b84-b949-932b22c4eb98\",\"rows\":[{\"name\":\"EventFieldSelector\",\"kind\":\"EventField\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"TrafficLight\"}]},{\"name\":\"NumberBecomes\",\"kind\":\"NumberBecomes\",\"arguments\":[{\"name\":\"op\",\"type\":\"string\",\"value\":\"BecomesGreaterThan\"},{\"name\":\"value\",\"type\":\"number\",\"value\":1.0}]},{\"name\":\"OccurrenceOption\",\"kind\":\"EachTime\",\"arguments\":[]}]},{\"name\":\"ActStep\",\"id\":\"767bd484-62cd-4c1e-9100-6ddd2db96e76\",\"rows\":[{\"name\":\"EmailBinding\",\"kind\":\"EmailMessage\",\"arguments\":[{\"name\":\"messageLocale\",\"type\":\"string\",\"value\":\"en-us\"},{\"name\":\"sentTo\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"rf@allinsolutions.de\"}]},{\"name\":\"copyTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"bCCTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"subject\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"🟢 Lots of green power right now\"}]},{\"name\":\"headline\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"The power traffic light has switched to green\"}]},{\"name\":\"optionalMessage\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"Renewable share right now: @RenewableShare %. Good time for the washing machine, dishwasher or EV charging.\"}]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[{\"kind\":\"NameReferencePair\",\"type\":\"complex\",\"arguments\":[{\"name\":\"name\",\"type\":\"string\",\"value\":\"TrafficLight\"},{\"kind\":\"EventFieldReference\",\"type\":\"complexReference\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"TrafficLight\"}],\"name\":\"reference\"}]}]}]}]}]}",
+        "settings": {
+          "shouldRun": true,
+          "shouldApplyRuleOnUpdate": true
+        }
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "382905a7-a6ea-487d-9210-651ee82d4a9b",
+    "payload": {
+      "name": "Power Mix Alerts",
+      "description": "Container Description",
+      "type": "kqlQueries"
+    },
+    "type": "container-v1"
+  },
+  {
+    "uniqueIdentifier": "30b916bf-2ec3-436d-8fd2-d2e77a3adf1d",
+    "payload": {
+      "name": "eh_1 event",
+      "runSettings": {
+        "isStopped": false,
+        "executionIntervalInSeconds": 900
+      },
+      "query": {
+        "queryString": "let ts_now = toscalar(\n    energy_latest\n    | where endpoint == \"signal\" and ts <= now()\n    | summarize max(ts));\nenergy_latest\n| where endpoint == \"signal\" and ts == ts_now\n| summarize TrafficLight = toint(maxif(value, series_id == \"signal\")),\n            RenewableShare = round(maxif(value, series_id == \"share\"), 1)\n    by ts\n| project TrafficLight, RenewableShare, AsOf = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card"
+      },
+      "eventhouseItem": {
+        "itemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemType": "KustoDatabase"
+      },
+      "metadata": {
+        "workspaceId": "2d62e765-a23c-472d-ae33-cbe99497366c",
+        "querySetId": "986ef7c0-333d-432c-b4a8-3cc94c987d56",
+        "queryId": "bd3a01dd-899d-4791-b463-6b50c53e83f8"
+      },
+      "parentContainer": {
+        "targetUniqueIdentifier": "382905a7-a6ea-487d-9210-651ee82d4a9b"
+      }
+    },
+    "type": "kqlSource-v1"
+  },
+  {
+    "uniqueIdentifier": "8a697cd0-fa9d-4d6a-a6c6-4d080dfc975f",
+    "payload": {
+      "name": "eh_1 event",
+      "parentContainer": {
+        "targetUniqueIdentifier": "382905a7-a6ea-487d-9210-651ee82d4a9b"
+      },
+      "definition": {
+        "type": "Event",
+        "instance": "{\"steps\":[{\"id\":\"9e594505-6ef8-4704-bb5c-ed71ae7c28b0\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"30b916bf-2ec3-436d-8fd2-d2e77a3adf1d\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.3.0\"}"
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "c929e4ce-c229-4917-b853-d18432fd5e30",
+    "payload": {
+      "name": "Grid Congestion",
+      "parentContainer": {
+        "targetUniqueIdentifier": "382905a7-a6ea-487d-9210-651ee82d4a9b"
+      },
+      "definition": {
+        "type": "Rule",
+        "instance": "{\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.3.0\",\"steps\":[{\"name\":\"FieldsDefaultsStep\",\"id\":\"be131ac4-062d-4c21-9521-dcf65b0ebe81\",\"rows\":[{\"name\":\"EventSelector\",\"kind\":\"Event\",\"arguments\":[{\"kind\":\"EventReference\",\"type\":\"complex\",\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"8a697cd0-fa9d-4d6a-a6c6-4d080dfc975f\"}],\"name\":\"event\"}]}]},{\"name\":\"EventDetectStep\",\"id\":\"d5b7711e-3e6d-41a3-9973-7d396c2a064f\",\"rows\":[{\"name\":\"EventFieldSelector\",\"kind\":\"EventField\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"___id\"}]},{\"name\":\"NumberBecomes\",\"kind\":\"NumberBecomes\",\"arguments\":[{\"name\":\"op\",\"type\":\"string\",\"value\":\"BecomesLessThan\"},{\"name\":\"value\",\"type\":\"number\",\"value\":0.0}]},{\"name\":\"OccurrenceOption\",\"kind\":\"EachTime\",\"arguments\":[]}]},{\"name\":\"ActStep\",\"id\":\"7a08c282-e52a-4e3b-88b9-97b6c5374741\",\"rows\":[{\"name\":\"EmailBinding\",\"kind\":\"EmailMessage\",\"arguments\":[{\"name\":\"messageLocale\",\"type\":\"string\",\"value\":\"en-us\"},{\"name\":\"sentTo\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"rf@allinsolutions.de\"}]},{\"name\":\"copyTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"bCCTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"subject\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"⛔ Grid congestion in the German power grid\"}]},{\"name\":\"headline\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"The power traffic light shows grid congestion\"}]},{\"name\":\"optionalMessage\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"The power grid is currently heavily loaded. If possible, switch on power-hungry appliances later.\"}]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[{\"kind\":\"NameReferencePair\",\"type\":\"complex\",\"arguments\":[{\"name\":\"name\",\"type\":\"string\",\"value\":\"TrafficLight\"},{\"kind\":\"EventFieldReference\",\"type\":\"complexReference\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"TrafficLight\"}],\"name\":\"reference\"}]}]}]}]}]}",
+        "settings": {
+          "shouldRun": true,
+          "shouldApplyRuleOnUpdate": true
+        }
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "32b91c44-d8ed-4334-9dd5-726b3d2d40b7",
+    "payload": {
+      "name": "Power Mix Alerts",
+      "description": "Container Description",
+      "type": "kqlQueries"
+    },
+    "type": "container-v1"
+  },
+  {
+    "uniqueIdentifier": "20847f52-841a-43d3-a0f5-19510dc92892",
+    "payload": {
+      "name": "eh_1 event",
+      "runSettings": {
+        "isStopped": false,
+        "executionIntervalInSeconds": 300
+      },
+      "query": {
+        "queryString": "energy_raw\n| where ingestion_time() > ago(1d)\n| summarize LastIngestionUtc = max(ingestion_time())\n| project MinutesWithoutData = datetime_diff(\"minute\", now(), LastIngestionUtc),\n          LastIngestion = datetime_utc_to_local(LastIngestionUtc, \"Europe/Berlin\")\n| render card"
+      },
+      "eventhouseItem": {
+        "itemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemType": "KustoDatabase"
+      },
+      "queryParameters": [],
+      "metadata": {
+        "workspaceId": "2d62e765-a23c-472d-ae33-cbe99497366c",
+        "querySetId": "986ef7c0-333d-432c-b4a8-3cc94c987d56",
+        "queryId": "2692ea03-c25f-4df2-aee8-0098e9a8fea0"
+      },
+      "parentContainer": {
+        "targetUniqueIdentifier": "32b91c44-d8ed-4334-9dd5-726b3d2d40b7"
+      }
+    },
+    "type": "kqlSource-v1"
+  },
+  {
+    "uniqueIdentifier": "e2406b3c-9512-4710-9ccb-c70c86914461",
+    "payload": {
+      "name": "eh_1 event",
+      "parentContainer": {
+        "targetUniqueIdentifier": "32b91c44-d8ed-4334-9dd5-726b3d2d40b7"
+      },
+      "definition": {
+        "type": "Event",
+        "instance": "{\"steps\":[{\"id\":\"69286718-8027-4c2a-9478-104f195033f2\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"20847f52-841a-43d3-a0f5-19510dc92892\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.3.0\"}"
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "981fd08a-6a9c-4f98-a35e-5da36e5ff286",
+    "payload": {
+      "name": "Data Outage",
+      "parentContainer": {
+        "targetUniqueIdentifier": "32b91c44-d8ed-4334-9dd5-726b3d2d40b7"
+      },
+      "definition": {
+        "type": "Rule",
+        "instance": "{\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.3.0\",\"steps\":[{\"name\":\"FieldsDefaultsStep\",\"id\":\"4dbeecbc-5f26-434c-8624-1472047fb78b\",\"rows\":[{\"name\":\"EventSelector\",\"kind\":\"Event\",\"arguments\":[{\"kind\":\"EventReference\",\"type\":\"complex\",\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"e2406b3c-9512-4710-9ccb-c70c86914461\"}],\"name\":\"event\"}]}]},{\"name\":\"EventDetectStep\",\"id\":\"497dd270-205e-4eab-8d2c-1ad44b7e9fa1\",\"rows\":[{\"name\":\"EventFieldSelector\",\"kind\":\"EventField\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"___id\"}]},{\"name\":\"NumberBecomes\",\"kind\":\"NumberBecomes\",\"arguments\":[{\"name\":\"op\",\"type\":\"string\",\"value\":\"BecomesGreaterThan\"},{\"name\":\"value\",\"type\":\"number\",\"value\":30.0}]},{\"name\":\"OccurrenceOption\",\"kind\":\"EachTime\",\"arguments\":[]}]},{\"name\":\"ActStep\",\"id\":\"f42df979-9598-46fc-8d71-ab913b97fea4\",\"rows\":[{\"name\":\"EmailBinding\",\"kind\":\"EmailMessage\",\"arguments\":[{\"name\":\"messageLocale\",\"type\":\"string\",\"value\":\"en-us\"},{\"name\":\"sentTo\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"rf@allinsolutions.de\"}]},{\"name\":\"copyTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"bCCTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"subject\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"🔧 Power mix pipeline: no new data\"}]},{\"name\":\"headline\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"No data in the Eventhouse for more than 30 minutes\"}]},{\"name\":\"optionalMessage\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"Last data received: @LastIngestion. Please check the Azure Function and the Eventstream.\"}]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[{\"kind\":\"NameReferencePair\",\"type\":\"complex\",\"arguments\":[{\"name\":\"name\",\"type\":\"string\",\"value\":\"MinutesWithoutData\"},{\"kind\":\"EventFieldReference\",\"type\":\"complexReference\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"MinutesWithoutData\"}],\"name\":\"reference\"}]}]}]}]}]}",
+        "settings": {
+          "shouldRun": true,
+          "shouldApplyRuleOnUpdate": true
+        }
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "497edad3-7f9f-49e9-b389-cd1bdc174b87",
+    "payload": {
+      "name": "Power Mix Alerts",
+      "description": "Container Description",
+      "type": "kqlQueries"
+    },
+    "type": "container-v1"
+  },
+  {
+    "uniqueIdentifier": "d515174d-7d67-4d0c-a68c-95d60113abba",
+    "payload": {
+      "name": "eh_1 event",
+      "runSettings": {
+        "isStopped": false,
+        "executionIntervalInSeconds": 900
+      },
+      "query": {
+        "queryString": "let tomorrow = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\")) + 1d;\nenergy_latest\n| where endpoint == \"price\"\n| extend Time = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| where Time >= tomorrow and Time < tomorrow + 1d\n| summarize NegativeQuarterHoursTomorrow = countif(value < 0),\n            MinPrice_ct_kWh = round(min(value) / 10, 2)\n| render card"
+      },
+      "eventhouseItem": {
+        "itemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemType": "KustoDatabase"
+      },
+      "queryParameters": [],
+      "metadata": {
+        "workspaceId": "2d62e765-a23c-472d-ae33-cbe99497366c",
+        "querySetId": "986ef7c0-333d-432c-b4a8-3cc94c987d56",
+        "queryId": "c2478de1-36b6-4a12-aae8-200aebfc992c"
+      },
+      "parentContainer": {
+        "targetUniqueIdentifier": "497edad3-7f9f-49e9-b389-cd1bdc174b87"
+      }
+    },
+    "type": "kqlSource-v1"
+  },
+  {
+    "uniqueIdentifier": "2728ad23-48b0-471c-8439-3b7f29060c36",
+    "payload": {
+      "name": "eh_1 event",
+      "parentContainer": {
+        "targetUniqueIdentifier": "497edad3-7f9f-49e9-b389-cd1bdc174b87"
+      },
+      "definition": {
+        "type": "Event",
+        "instance": "{\"steps\":[{\"id\":\"6c73e5c8-b988-4e07-8b78-93b115f8b809\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"d515174d-7d67-4d0c-a68c-95d60113abba\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.3.0\"}"
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "bb05791b-e3d9-453f-9ca7-305d014f6ab8",
+    "payload": {
+      "name": "Negative Prices Tomorrow",
+      "parentContainer": {
+        "targetUniqueIdentifier": "497edad3-7f9f-49e9-b389-cd1bdc174b87"
+      },
+      "definition": {
+        "type": "Rule",
+        "instance": "{\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.3.0\",\"steps\":[{\"name\":\"FieldsDefaultsStep\",\"id\":\"be142dcb-f1d6-4cf2-8e8a-e883d7e0df49\",\"rows\":[{\"name\":\"EventSelector\",\"kind\":\"Event\",\"arguments\":[{\"kind\":\"EventReference\",\"type\":\"complex\",\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"2728ad23-48b0-471c-8439-3b7f29060c36\"}],\"name\":\"event\"}]}]},{\"name\":\"EventDetectStep\",\"id\":\"f399cd2d-b7be-4dbe-9825-af8b6dcf4b58\",\"rows\":[{\"name\":\"EventFieldSelector\",\"kind\":\"EventField\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"NegativeQuarterHoursTomorrow\"}]},{\"name\":\"NumberBecomes\",\"kind\":\"NumberBecomes\",\"arguments\":[{\"name\":\"op\",\"type\":\"string\",\"value\":\"BecomesGreaterThan\"},{\"name\":\"value\",\"type\":\"number\",\"value\":0.0}]},{\"name\":\"OccurrenceOption\",\"kind\":\"EachTime\",\"arguments\":[]}]},{\"name\":\"ActStep\",\"id\":\"af4bf9bd-8c18-48bb-b0ec-e96d80e73b40\",\"rows\":[{\"name\":\"EmailBinding\",\"kind\":\"EmailMessage\",\"arguments\":[{\"name\":\"messageLocale\",\"type\":\"string\",\"value\":\"en-us\"},{\"name\":\"sentTo\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"rf@allinsolutions.de\"}]},{\"name\":\"copyTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"bCCTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"subject\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"💶 Negative electricity prices tomorrow\"}]},{\"name\":\"headline\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"Negative exchange electricity prices announced for tomorrow\"}]},{\"name\":\"optionalMessage\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"@NegativeQuarterHoursTomorrow quarter-hours with a negative price, lowest price @MinPrice_ct_kWh ct/kWh. Good opportunity for power-hungry appliances or EV charging with a dynamic tariff.\"}]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[{\"kind\":\"NameReferencePair\",\"type\":\"complex\",\"arguments\":[{\"name\":\"name\",\"type\":\"string\",\"value\":\"NegativeQuarterHoursTomorrow\"},{\"kind\":\"EventFieldReference\",\"type\":\"complexReference\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"NegativeQuarterHoursTomorrow\"}],\"name\":\"reference\"}]}]}]}]}]}",
+        "settings": {
+          "shouldRun": true,
+          "shouldApplyRuleOnUpdate": true
+        }
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "e3079c84-a00e-4802-9537-829439da4851",
+    "payload": {
+      "name": "Power Mix Alerts",
+      "description": "Container Description",
+      "type": "kqlQueries"
+    },
+    "type": "container-v1"
+  },
+  {
+    "uniqueIdentifier": "0b0c57f2-dffc-40ec-ad65-339d7b7f82fb",
+    "payload": {
+      "name": "eh_1 event",
+      "runSettings": {
+        "isStopped": false,
+        "executionIntervalInSeconds": 900
+      },
+      "query": {
+        "queryString": "energy_latest\n| where endpoint == \"price\" and ts <= now()\n| top 1 by ts desc\n| project Price_ct_kWh = round(value / 10, 2),\n          AsOf = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card"
+      },
+      "eventhouseItem": {
+        "itemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemType": "KustoDatabase"
+      },
+      "queryParameters": [],
+      "metadata": {
+        "workspaceId": "2d62e765-a23c-472d-ae33-cbe99497366c",
+        "querySetId": "986ef7c0-333d-432c-b4a8-3cc94c987d56",
+        "queryId": "f10d5c99-7e49-419e-a33d-7a10c132dd52"
+      },
+      "parentContainer": {
+        "targetUniqueIdentifier": "e3079c84-a00e-4802-9537-829439da4851"
+      }
+    },
+    "type": "kqlSource-v1"
+  },
+  {
+    "uniqueIdentifier": "8344bc33-6a8f-47dd-9f8e-f7eacc314e5f",
+    "payload": {
+      "name": "eh_1 event",
+      "parentContainer": {
+        "targetUniqueIdentifier": "e3079c84-a00e-4802-9537-829439da4851"
+      },
+      "definition": {
+        "type": "Event",
+        "instance": "{\"steps\":[{\"id\":\"f5c45473-0031-4cfc-90f9-f14dc7e08fb5\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"0b0c57f2-dffc-40ec-ad65-339d7b7f82fb\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.3.0\"}"
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "d4b9bf96-8a51-4b5f-b047-d2bc056bdf07",
+    "payload": {
+      "name": "Price Negative Now",
+      "parentContainer": {
+        "targetUniqueIdentifier": "e3079c84-a00e-4802-9537-829439da4851"
+      },
+      "definition": {
+        "type": "Rule",
+        "instance": "{\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.3.0\",\"steps\":[{\"name\":\"FieldsDefaultsStep\",\"id\":\"bf858f5b-cdce-47c6-b3b2-db09ffc70627\",\"rows\":[{\"name\":\"EventSelector\",\"kind\":\"Event\",\"arguments\":[{\"kind\":\"EventReference\",\"type\":\"complex\",\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"8344bc33-6a8f-47dd-9f8e-f7eacc314e5f\"}],\"name\":\"event\"}]}]},{\"name\":\"EventDetectStep\",\"id\":\"e5da297f-1828-4007-98a6-7698cd9feca4\",\"rows\":[{\"name\":\"EventFieldSelector\",\"kind\":\"EventField\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"___id\"}]},{\"name\":\"NumberBecomes\",\"kind\":\"NumberBecomes\",\"arguments\":[{\"name\":\"op\",\"type\":\"string\",\"value\":\"BecomesLessThan\"},{\"name\":\"value\",\"type\":\"number\",\"value\":0.0}]},{\"name\":\"OccurrenceOption\",\"kind\":\"EachTime\",\"arguments\":[]}]},{\"name\":\"ActStep\",\"id\":\"2fd23308-fd93-4f78-b8ad-2c9baeadfa4d\",\"rows\":[{\"name\":\"EmailBinding\",\"kind\":\"EmailMessage\",\"arguments\":[{\"name\":\"messageLocale\",\"type\":\"string\",\"value\":\"en-us\"},{\"name\":\"sentTo\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"rf@allinsolutions.de\"}]},{\"name\":\"copyTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"bCCTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"subject\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"💶 Electricity price is negative right now\"}]},{\"name\":\"headline\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"The exchange electricity price is currently below zero\"}]},{\"name\":\"optionalMessage\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"Current price: @Price_ct_kWh ct/kWh (as of @AsOf). Now is a good time for power-hungry appliances.\"}]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[{\"kind\":\"NameReferencePair\",\"type\":\"complex\",\"arguments\":[{\"name\":\"name\",\"type\":\"string\",\"value\":\"Price_ct_kWh\"},{\"kind\":\"EventFieldReference\",\"type\":\"complexReference\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"Price_ct_kWh\"}],\"name\":\"reference\"}]}]}]}]}]}",
+        "settings": {
+          "shouldRun": true,
+          "shouldApplyRuleOnUpdate": true
+        }
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "abc3008c-aae9-406d-bafd-fd3acca40395",
+    "payload": {
+      "name": "Power Mix Alerts",
+      "description": "Container Description",
+      "type": "kqlQueries"
+    },
+    "type": "container-v1"
+  },
+  {
+    "uniqueIdentifier": "ab6169b4-eebc-4615-b3da-36d4e8cd8678",
+    "payload": {
+      "name": "eh_1 event",
+      "runSettings": {
+        "isStopped": false,
+        "executionIntervalInSeconds": 900
+      },
+      "query": {
+        "queryString": "let cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\" and ts == LatestComplete\n| project NetImport_GW = round(value, 2),\n          AsOf = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card"
+      },
+      "eventhouseItem": {
+        "itemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemType": "KustoDatabase"
+      },
+      "queryParameters": [],
+      "metadata": {
+        "workspaceId": "2d62e765-a23c-472d-ae33-cbe99497366c",
+        "querySetId": "986ef7c0-333d-432c-b4a8-3cc94c987d56",
+        "queryId": "82c87692-6402-4f5e-b428-e38da695b8fd"
+      },
+      "parentContainer": {
+        "targetUniqueIdentifier": "abc3008c-aae9-406d-bafd-fd3acca40395"
+      }
+    },
+    "type": "kqlSource-v1"
+  },
+  {
+    "uniqueIdentifier": "b3321790-055a-48df-9833-91fdb5935287",
+    "payload": {
+      "name": "eh_1 event",
+      "parentContainer": {
+        "targetUniqueIdentifier": "abc3008c-aae9-406d-bafd-fd3acca40395"
+      },
+      "definition": {
+        "type": "Event",
+        "instance": "{\"steps\":[{\"id\":\"da64d608-d8ba-4215-8de2-80acbcda631e\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"ab6169b4-eebc-4615-b3da-36d4e8cd8678\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.3.0\"}"
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "93897c40-a298-4790-be47-52a24e8e56af",
+    "payload": {
+      "name": "High Export",
+      "parentContainer": {
+        "targetUniqueIdentifier": "abc3008c-aae9-406d-bafd-fd3acca40395"
+      },
+      "definition": {
+        "type": "Rule",
+        "instance": "{\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.3.0\",\"steps\":[{\"name\":\"FieldsDefaultsStep\",\"id\":\"dc026439-ccbe-4d38-8ce8-c5a9046c0329\",\"rows\":[{\"name\":\"EventSelector\",\"kind\":\"Event\",\"arguments\":[{\"kind\":\"EventReference\",\"type\":\"complex\",\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"b3321790-055a-48df-9833-91fdb5935287\"}],\"name\":\"event\"}]}]},{\"name\":\"EventDetectStep\",\"id\":\"98bba7d6-c972-4dc6-8533-e54896930115\",\"rows\":[{\"name\":\"EventFieldSelector\",\"kind\":\"EventField\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"NetImport_GW\"}]},{\"name\":\"NumberBecomes\",\"kind\":\"NumberBecomes\",\"arguments\":[{\"name\":\"op\",\"type\":\"string\",\"value\":\"BecomesLessThan\"},{\"name\":\"value\",\"type\":\"number\",\"value\":-5.0}]},{\"name\":\"OccurrenceOption\",\"kind\":\"EachTime\",\"arguments\":[]}]},{\"name\":\"ActStep\",\"id\":\"6eb6a627-1c96-40d1-8aed-e94b62d1630b\",\"rows\":[{\"name\":\"EmailBinding\",\"kind\":\"EmailMessage\",\"arguments\":[{\"name\":\"messageLocale\",\"type\":\"string\",\"value\":\"en-us\"},{\"name\":\"sentTo\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"rf@allinsolutions.de\"}]},{\"name\":\"copyTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"bCCTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"subject\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"⚡ Germany is exporting more than 5 GW of power\"}]},{\"name\":\"headline\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"High power surplus: Germany is exporting more than 5 GW\"}]},{\"name\":\"optionalMessage\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"Net import right now: @NetImport_GW GW (negative = export). As of: @AsOf\"}]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[{\"kind\":\"NameReferencePair\",\"type\":\"complex\",\"arguments\":[{\"name\":\"name\",\"type\":\"string\",\"value\":\"NetImport_GW\"},{\"kind\":\"EventFieldReference\",\"type\":\"complexReference\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"NetImport_GW\"}],\"name\":\"reference\"}]}]}]}]}]}",
+        "settings": {
+          "shouldRun": true,
+          "shouldApplyRuleOnUpdate": true
+        }
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "383c93f1-e259-4c8d-a12b-927b8c1e29de",
+    "payload": {
+      "name": "Power Mix Alerts",
+      "description": "Container Description",
+      "type": "kqlQueries"
+    },
+    "type": "container-v1"
+  },
+  {
+    "uniqueIdentifier": "b2e414fe-2c58-4048-84a2-ad7352a2582a",
+    "payload": {
+      "name": "eh_1 event",
+      "runSettings": {
+        "isStopped": false,
+        "executionIntervalInSeconds": 300
+      },
+      "query": {
+        "queryString": "let latest = toscalar(GridFrequency() | summarize max(ts));\nGridFrequency()\n| where ts > latest - 5m\n| summarize MaxDeviation_mHz = max(abs(deviation_mhz)),\n            Lowest_Hz = round(min(hz), 3),\n            Highest_Hz = round(max(hz), 3)\n| extend AsOf = datetime_utc_to_local(latest, \"Europe/Berlin\")\n| render card"
+      },
+      "eventhouseItem": {
+        "itemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "itemType": "KustoDatabase"
+      },
+      "queryParameters": [],
+      "metadata": {
+        "workspaceId": "2d62e765-a23c-472d-ae33-cbe99497366c",
+        "querySetId": "986ef7c0-333d-432c-b4a8-3cc94c987d56",
+        "queryId": "7f271e94-16b1-4f5e-8b9c-9e6a91dd247e"
+      },
+      "parentContainer": {
+        "targetUniqueIdentifier": "383c93f1-e259-4c8d-a12b-927b8c1e29de"
+      }
+    },
+    "type": "kqlSource-v1"
+  },
+  {
+    "uniqueIdentifier": "42922aa2-1cab-4713-b414-8fedf32923b4",
+    "payload": {
+      "name": "eh_1 event",
+      "parentContainer": {
+        "targetUniqueIdentifier": "383c93f1-e259-4c8d-a12b-927b8c1e29de"
+      },
+      "definition": {
+        "type": "Event",
+        "instance": "{\"steps\":[{\"id\":\"3aec350b-b9ef-45c8-abc5-dbb538371e32\",\"name\":\"SourceEventStep\",\"rows\":[{\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"b2e414fe-2c58-4048-84a2-ad7352a2582a\"}],\"kind\":\"SourceReference\",\"name\":\"SourceSelector\"}]}],\"templateId\":\"SourceEvent\",\"templateVersion\":\"1.3.0\"}"
+      }
+    },
+    "type": "timeSeriesView-v1"
+  },
+  {
+    "uniqueIdentifier": "a21e855c-3195-4f2d-8b1e-a2af21867444",
+    "payload": {
+      "name": "Frequency Deviation",
+      "parentContainer": {
+        "targetUniqueIdentifier": "383c93f1-e259-4c8d-a12b-927b8c1e29de"
+      },
+      "definition": {
+        "type": "Rule",
+        "instance": "{\"templateId\":\"EventTrigger\",\"templateVersion\":\"1.3.0\",\"steps\":[{\"name\":\"FieldsDefaultsStep\",\"id\":\"19a013f8-0421-4f35-8baa-e5d20705b304\",\"rows\":[{\"name\":\"EventSelector\",\"kind\":\"Event\",\"arguments\":[{\"kind\":\"EventReference\",\"type\":\"complex\",\"arguments\":[{\"name\":\"entityId\",\"type\":\"string\",\"value\":\"42922aa2-1cab-4713-b414-8fedf32923b4\"}],\"name\":\"event\"}]}]},{\"name\":\"EventDetectStep\",\"id\":\"b82a7981-614b-4464-a096-d1755e4721a0\",\"rows\":[{\"name\":\"EventFieldSelector\",\"kind\":\"EventField\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"___id\"}]},{\"name\":\"NumberBecomes\",\"kind\":\"NumberBecomes\",\"arguments\":[{\"name\":\"op\",\"type\":\"string\",\"value\":\"BecomesGreaterThan\"},{\"name\":\"value\",\"type\":\"number\",\"value\":100.0}]},{\"name\":\"OccurrenceOption\",\"kind\":\"EachTime\",\"arguments\":[]}]},{\"name\":\"ActStep\",\"id\":\"65188dc8-d5d6-4a54-b2f4-5cfbe82332a7\",\"rows\":[{\"name\":\"EmailBinding\",\"kind\":\"EmailMessage\",\"arguments\":[{\"name\":\"messageLocale\",\"type\":\"string\",\"value\":\"en-us\"},{\"name\":\"sentTo\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"rf@allinsolutions.de\"}]},{\"name\":\"copyTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"bCCTo\",\"type\":\"array\",\"values\":[]},{\"name\":\"subject\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"〰️ Grid frequency deviates strongly\"}]},{\"name\":\"headline\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"Grid frequency more than 100 mHz away from 50 Hz\"}]},{\"name\":\"optionalMessage\",\"type\":\"array\",\"values\":[{\"type\":\"string\",\"value\":\"Max deviation: @MaxDeviation_mHz mHz, lowest @Lowest_Hz Hz, highest @Highest_Hz Hz (as of @AsOf).\"}]},{\"name\":\"additionalInformation\",\"type\":\"array\",\"values\":[{\"kind\":\"NameReferencePair\",\"type\":\"complex\",\"arguments\":[{\"name\":\"name\",\"type\":\"string\",\"value\":\"MaxDeviation_mHz\"},{\"kind\":\"EventFieldReference\",\"type\":\"complexReference\",\"arguments\":[{\"name\":\"fieldName\",\"type\":\"string\",\"value\":\"MaxDeviation_mHz\"}],\"name\":\"reference\"}]}]}]}]}]}",
+        "settings": {
+          "shouldRun": true,
+          "shouldApplyRuleOnUpdate": true
+        }
+      }
+    },
+    "type": "timeSeriesView-v1"
+  }
+]

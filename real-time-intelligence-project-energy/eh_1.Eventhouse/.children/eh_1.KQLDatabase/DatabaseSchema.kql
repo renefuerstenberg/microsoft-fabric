@@ -1,0 +1,28 @@
+// KQL script
+// Use management commands in this script to configure your database items, such as tables, functions, materialized views, and more.
+
+
+.create-merge table energy_raw (endpoint:string, country:string, ts:datetime, series_id:string, series_name:string, value:real, unit:string, is_forecast:bool, generated_at:datetime) 
+.create-or-alter table energy_raw ingestion json mapping 'energy_raw_json'
+```
+[{"Properties":{"Path":"$.endpoint"},"column":"endpoint","datatype":""},{"Properties":{"Path":"$.country"},"column":"country","datatype":""},{"Properties":{"Path":"$.ts"},"column":"ts","datatype":""},{"Properties":{"Path":"$.series_id"},"column":"series_id","datatype":""},{"Properties":{"Path":"$.series_name"},"column":"series_name","datatype":""},{"Properties":{"Path":"$.value"},"column":"value","datatype":""},{"Properties":{"Path":"$.unit"},"column":"unit","datatype":""},{"Properties":{"Path":"$.is_forecast"},"column":"is_forecast","datatype":""},{"Properties":{"Path":"$.generated_at"},"column":"generated_at","datatype":""}]
+```
+.create-merge table frequency_raw (ts:datetime, hz:real, generated_at:datetime) 
+.create-or-alter function with (folder = "Power", docstring = "Grid frequency in second resolution (deduplicated)", skipvalidation = "true") GridFrequency() {
+    frequency_1s
+    | project ts, hz, deviation_mhz = round((hz - 50) * 1000, 1)
+}
+.create-or-alter materialized-view  energy_latest on table energy_raw { energy_raw
+    | summarize arg_max(generated_at, value, unit, series_name, is_forecast)
+        by endpoint, country, series_id, ts }
+.alter materialized-view energy_latest policy caching hotdata=time(365.00:00:00) hotindex=time(365.00:00:00)
+.create-or-alter materialized-view  frequency_1s on table frequency_raw { frequency_raw
+    | summarize hz = take_any(hz) by ts }
+.create-or-alter materialized-view  frequency_1min on table frequency_raw { frequency_raw
+    | summarize hz_min = min(hz), hz_avg = avg(hz), hz_max = max(hz), samples = count()
+        by ts = bin(ts, 1m) }
+.alter materialized-view frequency_1min policy caching hotdata=time(365.00:00:00) hotindex=time(365.00:00:00)
+.alter table energy_raw policy retention @'{"SoftDeletePeriod":"365000.00:00:00","Recoverability":"Enabled"}'
+.alter table energy_raw policy caching hotdata = time(30.00:00:00) hotindex = time(30.00:00:00)
+.alter table frequency_raw policy retention @'{"SoftDeletePeriod":"365000.00:00:00","Recoverability":"Enabled"}'
+.alter table frequency_raw policy caching hotdata = time(7.00:00:00) hotindex = time(7.00:00:00)

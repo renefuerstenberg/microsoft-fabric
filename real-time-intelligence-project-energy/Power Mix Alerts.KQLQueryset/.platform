@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "KQLQueryset",
+    "displayName": "Power Mix Alerts",
+    "description": "Strommix Alerts"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "4c987d56-3cc9-b4a8-432c-333d986ef7c0"
+  }
+}
