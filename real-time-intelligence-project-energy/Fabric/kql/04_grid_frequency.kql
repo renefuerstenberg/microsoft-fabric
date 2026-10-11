@@ -20,8 +20,7 @@
 
 
 // ============================================================
-// SETUP for a new installation (run each block separately)
-// An existing installation is converted with 00_migration_to_english.kql.
+// SETUP (run each block separately)
 // ============================================================
 
 // ------------------------------------------------------------

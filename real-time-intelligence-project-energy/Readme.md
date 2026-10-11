@@ -137,7 +137,6 @@ energy-ingest/
 ├── local.settings.json.example   Template for local settings (copy to local.settings.json)
 ├── .funcignore / .gitignore
 ├── kql/
-│   ├── 00_migration_to_english.kql   One-time switch of an existing installation to English names
 │   ├── 01_setup_eventhouse.kql       Table energy_raw, MV energy_latest, policies, checks
 │   ├── 02_dashboard_grid_live.kql    Dashboard page "Grid Live" (tiles + descriptions)
 │   ├── 03_dashboard_prices.kql       Dashboard page "Electricity Prices"
@@ -451,9 +450,6 @@ How the rules work:
    from `kql/02`–`kql/04`, or import `fabric/RealTimeDashboard.json` through Git.
 8. **Alerts**: create a KQL queryset with the queries from `kql/05_activator_alerts.kql`,
    then *Add alert* for every rule, all saved to the same Activator item.
-
-`kql/00_migration_to_english.kql` is only needed for installations that still use the
-earlier German object names.
 
 ---
 
