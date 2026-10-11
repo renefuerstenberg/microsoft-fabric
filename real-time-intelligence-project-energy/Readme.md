@@ -53,8 +53,8 @@ Real-Time Dashboard and Activator alerts sit on top of the Eventhouse.
   source publishes newer figures.
 - **Seven e-mail alerts**: green power, grid congestion, high export, negative prices
   (now / tomorrow), frequency deviations and pipeline outages.
-- **Everything in Git**: function code, KQL scripts, and the Fabric items through Fabric Git
-  integration.
+- **Everything in Git**: function code, KQL scripts and all Fabric items (through Fabric Git
+  integration) in one repository.
 
 ---
 
@@ -72,7 +72,7 @@ flowchart LR
     end
 
     subgraph Fabric["Microsoft Fabric – workspace RTI Energy Germany"]
-        ES["Eventstream<br/>custom endpoint"]
+        ES["Eventstream PowerMix Stream<br/>custom endpoint"]
         FA["Filter endpoint != frequency<br/>+ Manage fields"]
         FB["Filter endpoint == frequency<br/>+ Manage fields (value → hz)"]
         subgraph EH["Eventhouse – KQL database eh_1"]
@@ -83,9 +83,9 @@ flowchart LR
             MV3["MV frequency_1min"]
             FN["function GridFrequency()"]
         end
-        DB["Real-Time Dashboard<br/>3 pages"]
-        QS["KQL Queryset<br/>alert queries"]
-        ACT["Activator<br/>7 rules → e-mail"]
+        DB["Dashboard Power Mix Germany<br/>3 pages"]
+        QS["Queryset Power Mix Alerts<br/>alert queries"]
+        ACT["Power Mix Activator<br/>7 rules → e-mail"]
     end
 
     API --> F1 & F2 & F3 & F4
@@ -103,7 +103,7 @@ Plain-text version:
 Energy-Charts API v2 ──> Azure Functions (Python 3.13, Flex Consumption)
                               │  Event Hubs protocol (JSON)
                               ▼
-                     Fabric Eventstream (custom endpoint)
+            Fabric Eventstream "PowerMix Stream" (custom endpoint)
                        │ endpoint != "frequency"          │ endpoint == "frequency"
                        ▼                                  ▼
                Eventhouse eh_1: energy_raw        Eventhouse eh_1: frequency_raw
@@ -112,7 +112,7 @@ Energy-Charts API v2 ──> Azure Functions (Python 3.13, Flex Consumption)
                        │                          function GridFrequency()
                        └──────────────┬───────────────────┘
                                       ▼
-              Real-Time Dashboard (3 pages) · Activator (7 rules)
+   Dashboard "Power Mix Germany" (3 pages) · "Power Mix Activator" (7 rules)
 ```
 
 **Design decisions**
@@ -130,28 +130,44 @@ Energy-Charts API v2 ──> Azure Functions (Python 3.13, Flex Consumption)
 ## Repository structure
 
 ```
-energy-ingest/
-├── function_app.py               Azure Functions (4 timer triggers)
-├── requirements.txt              Python dependencies
-├── host.json                     Functions host configuration
-├── local.settings.json.example   Template for local settings (copy to local.settings.json)
-├── .funcignore / .gitignore
-├── kql/
-│   ├── 01_setup_eventhouse.kql       Table energy_raw, MV energy_latest, policies, checks
-│   ├── 02_dashboard_grid_live.kql    Dashboard page "Grid Live" (tiles + descriptions)
-│   ├── 03_dashboard_prices.kql       Dashboard page "Electricity Prices"
-│   ├── 04_grid_frequency.kql         Table frequency_raw, MVs, GridFrequency(), checks, page "Grid Frequency"
-│   └── 05_activator_alerts.kql       Queries and settings of all 7 Activator rules
-├── fabric/                       Reference copies of the Fabric item definitions (from Fabric Git)
-│   ├── RealTimeDashboard.json
-│   ├── RealTimeQueryset.json
-│   ├── ReflexEntities.json
-│   └── eventstream.json
-└── README.md
+real-time-intelligence-project-energy/
+├── Readme.md                          This file
+├── energy-ingest/                     Azure Function App (Python)
+│   ├── function_app.py                4 timer-triggered functions
+│   ├── requirements.txt               Python dependencies
+│   ├── host.json                      Functions host configuration
+│   ├── local.settings.json.example    Template for local settings (copy to local.settings.json)
+│   ├── .funcignore / .gitignore
+│   └── README.md                      Short developer notes (run, deploy)
+├── Fabric/
+│   └── kql/                           KQL scripts (setup, dashboard tiles, alerts)
+│       ├── 01_setup_eventhouse.kql    Table energy_raw, MV energy_latest, policies, checks
+│       ├── 02_dashboard_grid_live.kql Dashboard page "Grid Live" (tiles + descriptions)
+│       ├── 03_dashboard_prices.kql    Dashboard page "Electricity Prices"
+│       ├── 04_grid_frequency.kql      Table frequency_raw, MVs, GridFrequency(), checks, page "Grid Frequency"
+│       └── 05_activator_alerts.kql    Queries and settings of all 7 Activator rules
+├── eh_1.Eventhouse/                   ┐
+├── PowerMix Stream.Eventstream/       │
+├── Power Mix Activator.Reflex/        │ Fabric items – written and read by
+├── Power Mix Alerts.KQLQueryset/      │ Fabric Git integration
+├── Power Mix Germany.KQLDashboard/    ┘
+└── .vscode/                           Editor settings
 ```
 
-`local.settings.json` contains the connection string and is never committed.
-`kql/`, `fabric/` and `README.md` are excluded from the function deployment by `.funcignore`.
+### Fabric items
+
+| Item | Type | Purpose |
+|---|---|---|
+| `eh_1` | Eventhouse / KQL database | Tables, materialized views, function `GridFrequency()` |
+| `PowerMix Stream` | Eventstream | Custom endpoint, routing into `energy_raw` and `frequency_raw` |
+| `Power Mix Germany` | Real-Time Dashboard | 3 pages: Grid Live, Electricity Prices, Grid Frequency |
+| `Power Mix Alerts` | KQL Queryset | The 7 alert queries |
+| `Power Mix Activator` | Activator | 7 rules with e-mail actions |
+
+`energy-ingest/local.settings.json` contains the connection string and is never committed.
+The folders ending in `.Eventhouse`, `.Eventstream`, `.Reflex`, `.KQLQueryset` and
+`.KQLDashboard` are managed by Fabric – edit them only as described in
+[Git integration of the Fabric items](#git-integration-of-the-fabric-items).
 
 ---
 
@@ -293,7 +309,7 @@ Notes:
 
 ## Eventhouse data model
 
-KQL database **eh_1**. Setup scripts: `kql/01_setup_eventhouse.kql` and `kql/04_grid_frequency.kql`.
+KQL database **eh_1**. Setup scripts: `Fabric/kql/01_setup_eventhouse.kql` and `Fabric/kql/04_grid_frequency.kql`.
 
 ### Tables
 
@@ -356,7 +372,7 @@ complete list.
 
 Parameter **Time range** (`_startTime` / `_endTime`) is shown on all pages. Recommended
 default: last 24 hours. All times are displayed in local time (Europe/Berlin).
-Queries: `kql/02`–`kql/04`. The complete definition is in `fabric/RealTimeDashboard.json`.
+Queries: `Fabric/kql/02`–`04`. The complete definition is in `Power Mix Germany.KQLDashboard/`.
 
 ### Page 1 – Grid Live
 
@@ -406,8 +422,8 @@ Queries: `kql/02`–`kql/04`. The complete definition is in `fabric/RealTimeDash
 
 ## Activator alerts
 
-All rules live in one Activator item and use queries from the KQL queryset
-(`kql/05_activator_alerts.kql`, `fabric/ReflexEntities.json`).
+All rules live in the Activator **Power Mix Activator** and use the queries of the KQL queryset
+**Power Mix Alerts** (documented in `Fabric/kql/05_activator_alerts.kql`).
 
 | # | Rule | Field | Condition | Interval |
 |---|---|---|---|---|
@@ -434,9 +450,9 @@ How the rules work:
 ## Setup from scratch
 
 1. **Eventhouse**: create an Eventhouse with the KQL database `eh_1`.
-2. **Tables and views**: run `kql/01_setup_eventhouse.kql` (blocks 1–6) and the setup part
-   of `kql/04_grid_frequency.kql` (E1–E5), one block at a time.
-3. **Eventstream**: create an Eventstream with a **custom endpoint** source. Copy the
+2. **Tables and views**: run `Fabric/kql/01_setup_eventhouse.kql` (blocks 1–6) and the setup part
+   of `Fabric/kql/04_grid_frequency.kql` (E1–E5), one block at a time.
+3. **Eventstream**: create an Eventstream (here: *PowerMix Stream*) with a **custom endpoint** source. Copy the
    Event Hub connection string (incl. `EntityPath`).
 4. **Routing**: add both paths as described in [Fabric Eventstream](#fabric-eventstream),
    each with a filter, *Manage fields* and an Eventhouse destination in
@@ -446,9 +462,10 @@ How the rules work:
 6. **Check the data flow**: run the checks in `01_setup_eventhouse.kql` and
    `04_grid_frequency.kql`. Optionally start `EnergyBackfill` manually to load the last
    3 days immediately.
-7. **Dashboard**: create a Real-Time Dashboard with eh_1 as the data source and the tiles
-   from `kql/02`–`kql/04`, or import `fabric/RealTimeDashboard.json` through Git.
-8. **Alerts**: create a KQL queryset with the queries from `kql/05_activator_alerts.kql`,
+7. **Dashboard**: create a Real-Time Dashboard (here: *Power Mix Germany*) with eh_1 as the data source and the tiles
+   from `Fabric/kql/02`–`04`, or let Fabric Git integration create it from
+   `Power Mix Germany.KQLDashboard/`.
+8. **Alerts**: create a KQL queryset with the queries from `Fabric/kql/05_activator_alerts.kql`,
    then *Add alert* for every rule, all saved to the same Activator item.
 
 ---
@@ -459,7 +476,7 @@ How the rules work:
 the local storage emulator.
 
 ```bash
-cd energy-ingest
+cd real-time-intelligence-project-energy/energy-ingest
 python3.13 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -500,11 +517,13 @@ here: Eventstream, Eventhouse / KQL database, KQL queryset, Real-Time Dashboard 
 
 | Item | File in the repo | Safe to edit in Git? |
 |---|---|---|
-| Real-Time Dashboard | `<name>.KQLDashboard/RealTimeDashboard.json` | Yes – titles, descriptions, queries, visual options. Never change `id`, `pageId`, `queryId`. |
-| KQL queryset | `<name>.KQLQueryset/RealTimeQueryset.json` | Yes – tab content and titles. Keep tab IDs (Activator refers to them). |
-| Activator | `<name>.Reflex/ReflexEntities.json` | With care (preview) – query text, rule names, field names, e-mail texts. Keep all `uniqueIdentifier` values. |
-| Eventstream | `<name>.Eventstream/eventstream.json` | With care – the live data flow is republished. Do not rename the custom endpoint source. |
-| KQL database | schema files | Prefer running schema changes as KQL commands in a queryset. |
+| Real-Time Dashboard | `Power Mix Germany.KQLDashboard/RealTimeDashboard.json` | Yes – titles, descriptions, queries, visual options. Never change `id`, `pageId`, `queryId`. |
+| KQL queryset | `Power Mix Alerts.KQLQueryset/RealTimeQueryset.json` | Yes – tab content and titles. Keep tab IDs (Activator refers to them). |
+| Activator | `Power Mix Activator.Reflex/ReflexEntities.json` | With care (preview) – query text, rule names, field names, e-mail texts. Keep all `uniqueIdentifier` values. |
+| Eventstream | `PowerMix Stream.Eventstream/eventstream.json` | With care – the live data flow is republished. Do not rename the custom endpoint source. |
+| Eventhouse / KQL database | `eh_1.Eventhouse/` (schema files) | Prefer running schema changes as KQL commands in a queryset. |
+
+Do not rename the KQL database `eh_1`: the Eventstream destinations refer to it by name.
 
 Workflow: edit the file → commit and push → in Fabric *Source control → Update all* → check
 the item. To undo, revert the commit and update again.
@@ -551,10 +570,10 @@ GridFrequency()
 
 Expected: `Delay_s` about 100–150 seconds.
 
-**Frequency gaps of the last 7 days**: see `kql/04_grid_frequency.kql`. Only the short
+**Frequency gaps of the last 7 days**: see `Fabric/kql/04_grid_frequency.kql`. Only the short
 nightly gap before midnight UTC is expected.
 
-**How many values were corrected?**: see `kql/01_setup_eventhouse.kql` (backfill effect).
+**How many values were corrected?**: see `Fabric/kql/01_setup_eventhouse.kql` (backfill effect).
 
 | Symptom | Likely cause | What to do |
 |---|---|---|
