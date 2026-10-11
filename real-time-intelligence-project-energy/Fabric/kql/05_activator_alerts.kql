@@ -28,15 +28,16 @@
 //   Alert 1 – rule name: "Lots of Green Power"
 //     When: TrafficLight -> Increases above 1
 //     Subject:  "🟢 Lots of green power right now"
-//     Headline: "Traffic light switched to green"
-//     Notes:    "Renewable share: @RenewableShare % (as of @AsOf).
-//                Good time for washing machine, dishwasher or EV charging."
+//     Headline: "The power traffic light has switched to green"
+//     Notes:    "Renewable share right now: @RenewableShare %. Good time for the
+//                washing machine, dishwasher or EV charging."
 //
 //   Alert 2 – rule name: "Grid Congestion"
 //     When: TrafficLight -> Decreases below 0
-//     Subject:  "⛔ Grid congestion"
-//     Headline: "Traffic light switched to grid congestion"
-//     Notes:    "Renewable share: @RenewableShare % (as of @AsOf)."
+//     Subject:  "⛔ Grid congestion in the German power grid"
+//     Headline: "The power traffic light shows grid congestion"
+//     Notes:    "The power grid is currently heavily loaded. If possible, switch
+//                on power-hungry appliances later."
 // ------------------------------------------------------------
 let ts_now = toscalar(
     energy_latest
@@ -55,9 +56,9 @@ energy_latest
 // Alert 3 – rule name: "High Export"
 //   When: NetImport_GW -> Decreases below -5   (export above 5 GW)
 //   Run query every: 15 minutes
-//   Subject:  "⚡ Germany exports more than 5 GW"
-//   Headline: "High net power export"
-//   Notes:    "Net import: @NetImport_GW GW (negative = export, as of @AsOf)."
+//   Subject:  "⚡ Germany is exporting more than 5 GW of power"
+//   Headline: "High power surplus: Germany is exporting more than 5 GW"
+//   Notes:    "Net import right now: @NetImport_GW GW (negative = export). As of: @AsOf"
 //   Only uses the latest completely reported timestamp
 //   (same completeness rule as the dashboard tiles):
 //   all 11 countries; if none within the last 6 h, at least 10 of 11.
@@ -79,12 +80,12 @@ energy_latest
 // ------------------------------------------------------------
 // Alert 4 – rule name: "Data Outage"
 //   When: MinutesWithoutData -> Increases above 30
-//   Run query every: 10 minutes
+//   Run query every: 5 minutes
 //   Normal: 0–5 minutes (EnergyIngest runs every 5 minutes)
-//   Subject:  "🚨 No new energy data for 30 minutes"
-//   Headline: "Pipeline outage"
-//   Notes:    "Last ingestion: @LastIngestion (@MinutesWithoutData minutes ago).
-//              Check the Azure Function app and the Eventstream."
+//   Subject:  "🔧 Power mix pipeline: no new data"
+//   Headline: "No data in the Eventhouse for more than 30 minutes"
+//   Notes:    "Last data received: @LastIngestion. Please check the Azure Function
+//              and the Eventstream."
 // ------------------------------------------------------------
 energy_raw
 | where ingestion_time() > ago(1d)
@@ -101,9 +102,10 @@ energy_raw
 //   Fires once a day as soon as the auction for tomorrow is
 //   published (around 13:00) and contains negative prices.
 //   Subject:  "💶 Negative electricity prices tomorrow"
-//   Headline: "Tomorrow's auction contains negative prices"
-//   Notes:    "@NegativeQuarterHoursTomorrow quarter-hours with a negative
-//              price, lowest price @MinPrice_ct_kWh ct/kWh."
+//   Headline: "Negative exchange electricity prices announced for tomorrow"
+//   Notes:    "@NegativeQuarterHoursTomorrow quarter-hours with a negative price,
+//              lowest price @MinPrice_ct_kWh ct/kWh. Good opportunity for
+//              power-hungry appliances or EV charging with a dynamic tariff."
 // ------------------------------------------------------------
 let tomorrow = startofday(datetime_utc_to_local(now(), "Europe/Berlin")) + 1d;
 energy_latest
@@ -120,8 +122,9 @@ energy_latest
 //   When: Price_ct_kWh -> Decreases below 0
 //   Run query every: 15 minutes
 //   Subject:  "💶 Electricity price is negative right now"
-//   Headline: "Negative exchange price"
-//   Notes:    "Current price: @Price_ct_kWh ct/kWh (as of @AsOf)."
+//   Headline: "The exchange electricity price is currently below zero"
+//   Notes:    "Current price: @Price_ct_kWh ct/kWh (as of @AsOf). Now is a good
+//              time for power-hungry appliances."
 // ------------------------------------------------------------
 energy_latest
 | where endpoint == "price" and ts <= now()
@@ -135,18 +138,20 @@ energy_latest
 // Alert 7 – rule name: "Frequency Deviation"
 //   When: MaxDeviation_mHz -> Increases above 100
 //   Run query every: 5 minutes
-//   Largest deviation from 50 Hz within the last 5 minutes of data.
+//   Largest deviation from 50 Hz within the last 6 minutes of data
+//   (6 instead of 5 so consecutive runs overlap and no spike is missed).
+//   Note: do not name a variable "latest" – it is a reserved word in KQL.
 //   100 mHz is rare (weeks can pass without); use 50 for more alerts.
 //   Subject:  "〰️ Grid frequency deviates strongly"
 //   Headline: "Grid frequency more than 100 mHz away from 50 Hz"
 //   Notes:    "Max deviation: @MaxDeviation_mHz mHz, lowest @Lowest_Hz Hz,
 //              highest @Highest_Hz Hz (as of @AsOf)."
 // ------------------------------------------------------------
-let latest = toscalar(GridFrequency() | summarize max(ts));
+let last_ts = toscalar(GridFrequency() | summarize max(ts));
 GridFrequency()
-| where ts > latest - 5m
+| where ts > last_ts - 6m
 | summarize MaxDeviation_mHz = max(abs(deviation_mhz)),
             Lowest_Hz = round(min(hz), 3),
             Highest_Hz = round(max(hz), 3)
-| extend AsOf = datetime_utc_to_local(latest, "Europe/Berlin")
+| extend AsOf = datetime_utc_to_local(last_ts, "Europe/Berlin")
 | render card
