@@ -1,0 +1,51 @@
+{
+  "queryset": {
+    "version": "1.0.0",
+    "dataSources": [
+      {
+        "id": "37d32987-477d-4b27-a6e2-0fa7f3225a93",
+        "clusterUri": "",
+        "type": "Fabric",
+        "databaseItemId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399"
+      }
+    ],
+    "tabs": [
+      {
+        "id": "bd3a01dd-899d-4791-b463-6b50c53e83f8",
+        "content": "//***********************************************************************************************************\nlet ts_jetzt = toscalar(\n    energy_latest\n    | where endpoint == \"signal\" and ts <= now()\n    | summarize max(ts));\nenergy_latest\n| where endpoint == \"signal\" and ts == ts_jetzt\n| summarize Ampel = toint(maxif(value, series_id == \"signal\")),\n            EE_Anteil = round(maxif(value, series_id == \"share\"), 1)\n    by ts\n| project Ampel, EE_Anteil, Stand = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card",
+        "title": "",
+        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
+      },
+      {
+        "id": "2692ea03-c25f-4df2-aee8-0098e9a8fea0",
+        "content": "energy_raw\n| where ingestion_time() > ago(1d)\n| summarize Letzter_Eingang = max(ingestion_time())\n| project Minuten_ohne_Daten = datetime_diff(\"minute\", now(), Letzter_Eingang),\n          Letzter_Eingang = datetime_utc_to_local(Letzter_Eingang, \"Europe/Berlin\")\n| render card",
+        "title": "",
+        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
+      },
+      {
+        "id": "c2478de1-36b6-4a12-aae8-200aebfc992c",
+        "content": "let morgen = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\")) + 1d;\nenergy_latest\n| where endpoint == \"price\"\n| extend Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| where Zeit >= morgen and Zeit < morgen + 1d\n| summarize Negative_Viertelstunden_morgen = countif(value < 0),\n            Min_ct_kWh = round(min(value) / 10, 2)\n| render card",
+        "title": "Negative Preise morgen",
+        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
+      },
+      {
+        "id": "f10d5c99-7e49-419e-a33d-7a10c132dd52",
+        "content": "energy_latest\n| where endpoint == \"price\" and ts <= now()\n| top 1 by ts desc\n| project Preis_ct_kWh = round(value / 10, 2),\n          Stand = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card",
+        "title": "Alert 6: Strompreis jetzt negativ",
+        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
+      },
+      {
+        "id": "82c87692-6402-4f5e-b428-e38da695b8fd",
+        "content": "let cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Gemeldet = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet voll11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 11 | summarize max(ts));\nlet voll10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 10 | summarize max(ts));\nlet LetzterVollstaendig = iff(isnotnull(voll11) and voll11 >= cbpf_max - 6h, voll11, voll10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\" and ts == LetzterVollstaendig\n| project Netto_Import_GW = round(value, 2),\n          Stand = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card",
+        "title": "",
+        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
+      },
+      {
+        "id": "7f271e94-16b1-4f5e-8b9c-9e6a91dd247e",
+        "content": "let letzte = toscalar(Netzfrequenz() | summarize max(ts));\nNetzfrequenz()\n| where ts > letzte - 5m\n| summarize Max_Abweichung_mHz = max(abs(abweichung_mhz)),\n            Tiefster_Wert_Hz = round(min(hz), 3),\n            Hoechster_Wert_Hz = round(max(hz), 3)\n| extend Stand = datetime_utc_to_local(letzte, \"Europe/Berlin\")\n| render card",
+        "title": "",
+        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
+      }
+    ]
+  }
+}

@@ -1,0 +1,905 @@
+{
+  "schema_version": 86,
+  "pagesNavWidth": 275.50001525878906,
+  "flavor": "RTDashboard_Regular",
+  "changeDetection": {
+    "kind": "liveUpdates",
+    "minRefreshRate": "30s",
+    "fallbackRefreshRate": "1m"
+  },
+  "tiles": [
+    {
+      "id": "fd7977ab-3bf5-4014-92ca-c0b4df718f36",
+      "title": "Ampel jetzt",
+      "visualType": "card",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "62373baa-ce36-4015-8c3a-ec941d66be30"
+      },
+      "description": "Zeigt, wie viel Ökostrom gerade im deutschen Netz ist. Grün = viel Wind- und Sonnenstrom, guter Zeitpunkt für Waschmaschine, Spülmaschine oder E-Auto. Gelb = durchschnittlich. Rot = viel Kohle und Gas. Netzengpass = das Stromnetz ist gerade stark ausgelastet.",
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "2b7fbd6f-026b-40c3-a9f6-8cf4d4c4679b",
+      "title": "EE-Anteil jetzt (%)",
+      "visualType": "card",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "b061f3c6-e11d-455c-b1c3-8fd90999bfac"
+      },
+      "description": "Anteil der erneuerbaren Energien (Wind, Sonne, Wasser, Biomasse) am aktuellen Stromverbrauch in Deutschland. Werte über 100 % bedeuten, dass mehr Ökostrom erzeugt als verbraucht wird. Der Überschuss wird exportiert oder gespeichert.",
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "a6a1f7c5-1d22-48a1-b566-8de04af583fa",
+      "title": "Netto-Import/Export jetzt (GW)",
+      "visualType": "card",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 5,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "daeee44a-112f-4ea4-9730-e88945834777"
+      },
+      "description": "Stromaustausch mit allen Nachbarländern zusammen.\nPositiv = Deutschland importiert Strom Negativ = Deutschland exportiert Strom. \n1 GW entspricht etwa der Leistung eines großen Kraftwerksblocks. Zeigt den letzten vollständig gemeldeten Wert.\nZur Einordnung: 1 GW entspricht etwa der Leistung eines großen Kraftwerksblocks.",
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "009a452a-00ac-48d5-bf4c-94036062b32f",
+      "title": "Strommix, 15 Quellen zu 10 Gruppen zusammengefasst",
+      "visualType": "stackedarea",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 24,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "20efbaf2-71b6-4983-bc96-77a43e2e5c84"
+      },
+      "description": "Woher der Strom im Tagesverlauf kommt, gestapelt nach Energiequellen. Die Gesamthöhe entspricht der gesamten Stromerzeugung in Deutschland. Typisch: Solar wächst zur Mittagszeit an, Wind schwankt mit dem Wetter.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "38583f5e-b394-4bf7-9f40-cb0ee1428226",
+      "title": "Last und Residuallast",
+      "visualType": "line",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 12,
+        "y": 12,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "9c079379-f93b-47bf-8ba7-078f3a566a25"
+      },
+      "description": "Last = gesamter Stromverbrauch in Deutschland. \nResiduallast = der Teil des Verbrauchs, der nicht durch Wind und Sonne gedeckt wird und von anderen Kraftwerken (Gas, Kohle, Wasserkraft) kommen muss.\nJe niedriger die Residuallast, desto mehr erledigen Wind und Sonne allein.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "bc2bcf85-a55d-4624-9c01-a0e570a86347",
+      "title": "EE-Anteil Ist + Prognose bis Mitternacht",
+      "visualType": "line",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "60cbc939-abda-40b2-94cc-c066bdc96771"
+      },
+      "description": "Verlauf des Ökostrom-Anteils am Verbrauch, inklusive Vorhersage bis Mitternacht. Hilft bei der Planung: Hohe Werte zeigen gute Zeitpunkte für stromintensive Geräte. Werte über 100 % bedeuten Ökostrom-Überschuss.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "95de8a79-e096-4eb5-9577-c02cc82f6bbd",
+      "title": "Grenzflüsse je Nachbarland",
+      "visualType": "bar",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 12,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "6fd23d65-732e-4320-9217-a004a1e323d7"
+      },
+      "description": "Stromflüsse zwischen Deutschland und jedem Nachbarland. Balken nach rechts = Strom fließt nach Deutschland (Import), Balken nach links = Strom fließt ins Nachbarland (Export). Zeigt den letzten vollständig gemeldeten Zeitpunkt.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "89d211fe-fefe-4223-971f-0b69a48da9e5",
+      "title": "Netto-Import im Zeitverlauf",
+      "visualType": "line",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 12,
+        "y": 19,
+        "width": 12,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "16315836-a013-4771-a5fd-10e6125a60f6"
+      },
+      "description": "Verlauf des gesamten Stromaustauschs über die letzten 24 Stunden. Über null = Deutschland importiert, unter null = Deutschland exportiert. Oft wird nachts bei wenig Wind importiert und mittags bei viel Sonne exportiert.",
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "be89fd1c-3617-423c-a296-9f87c2e28a8b",
+      "title": "\tDatenstand je Quelle (wie verzögert die API gerade ist)",
+      "visualType": "table",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 14,
+        "y": 0,
+        "width": 10,
+        "height": 5
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "15e6f64c-5f65-4f7c-95bd-4a32b01427fc"
+      },
+      "description": "Kontrollanzeige: Bis wann Daten vorliegen und wie verzögert sie sind. Die Datenquelle veröffentlicht einige Werte erst nach 1–3 Stunden, das ist normal. Erst Verzögerungen von vielen Stunden deuten auf ein Problem hin.",
+      "visualOptions": {
+        "table__enableRenderLinks": true,
+        "colorRulesDisabled": true,
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
+    },
+    {
+      "id": "14d5b0c1-ddba-4ee8-bf0a-a746e66d4929",
+      "title": "",
+      "visualType": "markdownCard",
+      "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
+      "layout": {
+        "x": 0,
+        "y": 25,
+        "width": 24,
+        "height": 3
+      },
+      "markdownText": "**Datenquellen**\n\n- Stromerzeugung, Ökostrom-Anteil, Grenzflüsse: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Strompreise (Day-Ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n\n*Aktualisierung alle 5 Minuten (Preise alle 15 Minuten) · Alle Zeiten in deutscher Ortszeit*",
+      "visualOptions": {}
+    },
+    {
+      "id": "5aa61905-4bbf-4593-b290-af39818a7943",
+      "title": "Netzfrequenz jetzt (Hz)",
+      "description": "Aktuelle Frequenz des europäischen Stromnetzes, gemessen in Freiburg. Sollwert sind 50 Hz. Liegt sie darunter, wird gerade mehr Strom verbraucht als erzeugt, liegt sie darüber, wird mehr erzeugt als verbraucht. Verzögerung ca. 2 Minuten.",
+      "visualType": "card",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "b2bafdb3-aaf6-4a01-80f8-a5979c084685"
+      },
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "9c0864b2-4830-4cdb-862e-fc95c7cc6cac",
+      "title": "Netzfrequenz – letzte Stunde (sekundengenau)",
+      "description": "Verlauf der Netzfrequenz in Sekundenauflösung. Normal sind Schwankungen von wenigen hundertstel Hertz um 50 Hz. Sprünge zur vollen Stunde entstehen oft, wenn Kraftwerke nach Fahrplan hoch- oder herunterfahren.",
+      "visualType": "line",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 18,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "991ad03f-8e3c-480f-a0b3-2332707b6e8a"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "Hz",
+            "columns": [],
+            "yAxisMaximumValue": 50.1,
+            "yAxisMinimumValue": 49.9,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+              {
+                "id": "a3f2cad6-c59b-4b6a-ae90-9120784624e4",
+                "value": 50
+              }
+            ]
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "5f862446-58ac-482f-bddf-043f838a4b7e",
+      "title": "Netzfrequenz – Minimum, Mittel, Maximum pro Minute",
+      "description": "Tiefster, mittlerer und höchster Frequenzwert jeder Minute im gewählten Zeitraum. Je weiter Minimum und Maximum auseinanderliegen, desto unruhiger war das Netz.",
+      "visualType": "line",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 24,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "0fc3714d-aaea-49c2-a4f1-4165bda0773b"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "Hz",
+            "columns": [],
+            "yAxisMaximumValue": 50.1,
+            "yAxisMinimumValue": 49.9,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+              {
+                "id": "de44ac3e-f8fc-4c5b-a577-051ddc574f8f",
+                "value": 50
+              }
+            ]
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "99f7c82d-c6c1-4188-9b18-ea9ef636c0af",
+      "title": "Netzfrequenz – Abweichungen heute",
+      "description": "Wie oft die Frequenz heute deutlich von 50 Hz abwich. ±50 mHz sind auffällig, ±100 mHz selten und deuten auf ein größeres Ereignis im europäischen Netz hin, etwa einen Kraftwerksausfall.",
+      "visualType": "table",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 24,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "977b0a1a-b20d-441e-8d5a-bd666d2cf24f"
+      },
+      "visualOptions": {
+        "table__enableRenderLinks": true,
+        "colorRulesDisabled": true,
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
+    },
+    {
+      "id": "034d2301-5376-408f-ae28-28913ec4ded1",
+      "title": "Strompreis jetzt (ct/kWh)",
+      "description": "Aktueller Börsenstrompreis (Day-Ahead-Auktion) für die laufende Viertelstunde. Reiner Großhandelspreis ohne Netzentgelte, Steuern und Abgaben – der Endkundenpreis liegt deutlich höher. Negative Werte bedeuten Stromüberschuss.",
+      "visualType": "card",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "fcb684fd-97ea-4f90-831c-a3cd12fad7ed"
+      },
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": false,
+        "colorRules": []
+      }
+    },
+    {
+      "id": "7ed62dee-f9e6-4327-889d-cadbedf183e6",
+      "title": "Strompreis heute und morgen",
+      "description": "Börsenstrompreis im Viertelstunden-Raster für heute und – ab ca. 13 Uhr – auch für morgen. Niedrige Balken zeigen günstige Zeiten, meist mittags bei viel Sonne oder bei starkem Wind. Hohe Preise treten typischerweise morgens und abends auf.",
+      "visualType": "column",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 24,
+        "height": 4
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "536e6926-8881-442c-b138-dd6b241b9e2e"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "b708f465-77cb-4f04-8959-4689abb6aa20",
+      "title": "Strompreis vs. Ökostrom-Anteil",
+      "description": "Börsenstrompreis (orange, linke Achse) und Ökostrom-Anteil am Verbrauch (blau, rechte Achse). Viel Ökostrom bedeutet meist niedrige Preise. Gestrichelte Linien: 0 ct (unten) und 100 % Ökostrom (oben).",
+      "visualType": "line",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 24,
+        "height": 6
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "3f0f877b-6730-4cc2-941b-bb5353777c37"
+      },
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "Strompreis (ct/kWh)",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": [
+              {
+                "id": "5e8c64f3-91e3-4837-8394-730d4d5512cb",
+                "value": 0
+              }
+            ]
+          },
+          "additional": [
+            {
+              "id": "2f584cdf-8eef-4e2e-a859-f17fbc9fe3a4",
+              "columns": [
+                "EE_Anteil_Prozent"
+              ],
+              "label": "Ökostrom-Anteil (%)",
+              "yAxisMaximumValue": 120,
+              "yAxisMinimumValue": 0,
+              "yAxisScale": "linear",
+              "horizontalLines": [
+                {
+                  "id": "19310705-4974-4720-a504-aabe00da087a",
+                  "value": 100
+                }
+              ]
+            }
+          ],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {
+          "Preis_ct_kWh": "color--(1)",
+          "EE_Anteil_Prozent": "color--(0)"
+        },
+        "hideLegend": false,
+        "legendLocation": "bottom",
+        "xColumnTitle": "",
+        "xColumn": "Zeit",
+        "yColumns": [
+          "Preis_ct_kWh",
+          "EE_Anteil_Prozent"
+        ],
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "crossFilter": [],
+        "drillthrough": []
+      }
+    },
+    {
+      "id": "c2a99901-4c5e-4a36-9043-057b29b4a21c",
+      "title": "Preisübersicht heute und morgen",
+      "description": "Kennzahlen des Börsenstrompreises je Tag: Durchschnitt, niedrigster und höchster Preis, Uhrzeit des günstigsten Preises und Anzahl der Viertelstunden mit negativem Preis. Werte für morgen erscheinen nach Veröffentlichung der Auktion gegen 13 Uhr.",
+      "visualType": "table",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 19,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a0844305-5560-4891-933c-2b9ef53c123e"
+      },
+      "visualOptions": {
+        "table__enableRenderLinks": true,
+        "colorRulesDisabled": true,
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
+    },
+    {
+      "id": "3af9149d-ec61-4383-814c-828ae15fe9b4",
+      "title": "",
+      "visualType": "markdownCard",
+      "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 24,
+        "height": 3
+      },
+      "markdownText": "**Datenquellen**\n\n- Stromerzeugung, Ökostrom-Anteil, Grenzflüsse: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Strompreise (Day-Ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n\n*Aktualisierung alle 5 Minuten (Preise alle 15 Minuten) · Alle Zeiten in deutscher Ortszeit*",
+      "visualOptions": {}
+    }
+  ],
+  "baseQueries": [],
+  "parameters": [
+    {
+      "kind": "duration",
+      "id": "2aad848c-4068-461b-8f0b-2ff0b6424b7c",
+      "displayName": "Time range",
+      "description": "",
+      "beginVariableName": "_startTime",
+      "endVariableName": "_endTime",
+      "defaultValue": {
+        "kind": "dynamic",
+        "count": 1,
+        "unit": "hours"
+      },
+      "showOnPages": {
+        "kind": "all"
+      }
+    }
+  ],
+  "dataSources": [
+    {
+      "id": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0",
+      "kind": "kusto-trident",
+      "clusterUri": "",
+      "databaseArtifactId": "24018399-9b9b-45e2-b363-9d8ec0d8e98c",
+      "database": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
+      "workspace": "00000000-0000-0000-0000-000000000000",
+      "name": "eh_1"
+    }
+  ],
+  "pages": [
+    {
+      "name": "Stromnetz Live",
+      "id": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89"
+    },
+    {
+      "id": "94179190-3f8c-4538-9ce8-0e4045e5101b",
+      "name": "Strompreise"
+    },
+    {
+      "name": "Netzfrequenz",
+      "id": "3c1d39af-621c-4395-8c4f-2b3f86520eb8"
+    }
+  ],
+  "queries": [
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 1: Ampel jetzt                     Visual: Stat / Table\n// ------------------------------------------------------------\nenergy_latest\n| where endpoint == \"signal\" and series_id == \"signal\" and ts <= now()\n| top 1 by ts desc\n| project Ampel = case(\n        value == 2,  \"🟢 Grün – viel Ökostrom\",\n        value == 1,  \"🟡 Gelb – durchschnittlich\",\n        value == 0,  \"🔴 Rot – wenig Ökostrom\",\n        value == -1, \"⛔ Rot – Netzengpass\",\n                     \"unbekannt\"),\n          Stand = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "62373baa-ce36-4015-8c3a-ec941d66be30",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 2: EE-Anteil an der Last jetzt     Visual: Stat (Einheit %)\n// ------------------------------------------------------------\nenergy_latest\n| where endpoint == \"signal\" and series_id == \"share\" and ts <= now()\n| top 1 by ts desc\n| project [\"EE-Anteil %\"] = round(value, 1)",
+      "id": "b061f3c6-e11d-455c-b1c3-8fd90999bfac",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 3: Netto-Import/Export jetzt       Visual: Stat (GW)\n// positiv = Import, negativ = Export\n// -\n\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Gemeldet = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet voll11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 11 | summarize max(ts));\nlet voll10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 10 | summarize max(ts));\nlet LetzterVollstaendig = iff(isnotnull(voll11) and voll11 >= cbpf_max - 6h, voll11, voll10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\" and ts == LetzterVollstaendig\n| project [\"Netto-Import GW\"] = round(value, 2),\n          Stand = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "daeee44a-112f-4ea4-9730-e88945834777",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 4: Strommix                        Visual: Area chart, stacked\n//   X: Zeit, Y: GW, Series: Quelle\n// ------------------------------------------------------------\nlet Quellen = datatable(series_id: string, Quelle: string)\n[\n    \"fossil_brown_coal_lignite\", \"Braunkohle\",\n    \"fossil_hard_coal\",          \"Steinkohle\",\n    \"fossil_gas\",                \"Erdgas\",\n    \"fossil_oil\",                \"Sonstige fossil\",\n    \"fossil_coal_derived_gas\",   \"Sonstige fossil\",\n    \"waste\",                     \"Sonstige\",\n    \"others\",                    \"Sonstige\",\n    \"geothermal\",                \"Sonstige\",\n    \"biomass\",                   \"Biomasse\",\n    \"hydro_run_of_river\",        \"Wasserkraft\",\n    \"hydro_water_reservoir\",     \"Wasserkraft\",\n    \"hydro_pumped_storage\",      \"Pumpspeicher\",\n    \"wind_offshore\",             \"Wind offshore\",\n    \"wind_onshore\",              \"Wind onshore\",\n    \"solar\",                     \"Solar\"\n];\nenergy_latest\n| where endpoint == \"public_power\" and ts between (_startTime .. _endTime)\n| join kind=inner Quellen on series_id\n| summarize GW = round(sum(value) / 1000, 2)\n    by Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"), Quelle\n| order by Zeit asc",
+      "id": "20efbaf2-71b6-4983-bc96-77a43e2e5c84",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 5: Last und Residuallast           Visual: Line chart\n// Residuallast = Last minus Wind und Solar\n// ------------------------------------------------------------\nenergy_latest\n| where endpoint == \"public_power\"\n    and series_id in (\"load\", \"residual_load\")\n    and ts between (_startTime .. _endTime)\n| project Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"),\n          Reihe = iff(series_id == \"load\", \"Last\", \"Residuallast\"),\n          GW = round(value / 1000, 2)\n| order by Zeit asc\n",
+      "id": "9c079379-f93b-47bf-8ba7-078f3a566a25",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 6: EE-Anteil – Ist und Prognose    Visual: Line chart\n// Bewusst bis 24 h in die Zukunft, damit die Prognose sichtbar ist\n// ------------------------------------------------------------\nunion\n    (energy_latest\n     | where endpoint == \"public_power\" and series_id == \"renewable_share_of_load\"\n     | extend Reihe = \"Ist (Erzeugungsdaten)\"),\n    (energy_latest\n     | where endpoint == \"signal\" and series_id == \"share\"\n     | extend Reihe = \"Signal inkl. Prognose\")\n| where ts between (_startTime .. now() + 24h)\n| project Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"), Reihe, Prozent = round(value, 1)\n| order by Zeit asc",
+      "id": "60cbc939-abda-40b2-94cc-c066bdc96771",
+      "usedVariables": [
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 7: Grenzflüsse je Nachbarland jetzt   Visual: Bar chart\n// positiv = Import nach DE, negativ = Export\n// ------------------------------------------------------------\nlet Laender = datatable(series_id: string, Land: string)\n[\n    \"austria\", \"Österreich\", \"belgium\", \"Belgien\", \"czech_republic\", \"Tschechien\",\n    \"denmark\", \"Dänemark\", \"france\", \"Frankreich\", \"luxembourg\", \"Luxemburg\",\n    \"netherlands\", \"Niederlande\", \"norway\", \"Norwegen\", \"poland\", \"Polen\",\n    \"sweden\", \"Schweden\", \"switzerland\", \"Schweiz\"\n];\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Gemeldet = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet voll11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 11 | summarize max(ts));\nlet voll10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 10 | summarize max(ts));\nlet LetzterVollstaendig = iff(isnotnull(voll11) and voll11 >= cbpf_max - 6h, voll11, voll10);\nenergy_latest\n| where endpoint == \"cbpf\" and ts == LetzterVollstaendig\n| join kind=inner Laender on series_id\n| project Land, GW = round(value, 2)\n| order by GW desc",
+      "id": "6fd23d65-732e-4320-9217-a004a1e323d7",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 8: Netto-Import im Zeitverlauf     Visual: Line oder Column chart\n// ------------------------------------------------------------\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Gemeldet = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet voll11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 11 | summarize max(ts));\nlet voll10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 10 | summarize max(ts));\nlet LetzterVollstaendig = iff(isnotnull(voll11) and voll11 >= cbpf_max - 6h, voll11, voll10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\"\n    and ts between (_startTime .. _endTime) and ts <= LetzterVollstaendig\n| project Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"), [\"Netto-Import GW\"] = round(value, 2)\n| order by Zeit asc",
+      "id": "16315836-a013-4771-a5fd-10e6125a60f6",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel 9: Datenstand je Quelle            Visual: Table\n// Zeigt, wie aktuell die Daten sind (Energy-Charts veröffentlicht verzögert)\n// ------------------------------------------------------------\nenergy_latest\n| where ts <= now()\n| summarize Letzter_Wert = max(ts), Letzter_Abruf = max(generated_at) by endpoint\n| project Quelle = endpoint,\n          [\"Daten bis\"] = datetime_utc_to_local(Letzter_Wert, \"Europe/Berlin\"),\n          [\"Verzögerung (min)\"] = datetime_diff(\"minute\", now(), Letzter_Wert),\n          [\"API-Stand\"] = datetime_utc_to_local(Letzter_Abruf, \"Europe/Berlin\")",
+      "id": "15e6f64c-5f65-4f7c-95bd-4a32b01427fc",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "Netzfrequenz()\n| top 1 by ts desc\n| project [\"Frequenz (Hz)\"] = round(hz, 3),\n          [\"Abweichung (mHz)\"] = abweichung_mhz,\n          Stand = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "b2bafdb3-aaf6-4a01-80f8-a5979c084685",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "Netzfrequenz()\n| where ts > ago(1h)\n| project Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"), [\"Frequenz (Hz)\"] = hz\n| order by Zeit asc",
+      "id": "991ad03f-8e3c-480f-a0b3-2332707b6e8a",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "frequency_1min\n| where ts between (_startTime .. _endTime)\n| project Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"),\n          [\"Minimum\"] = round(hz_min, 3),\n          [\"Mittel\"] = round(hz_avg, 3),\n          [\"Maximum\"] = round(hz_max, 3)\n| order by Zeit asc",
+      "id": "0fc3714d-aaea-49c2-a4f1-4165bda0773b",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "let heute = datetime_local_to_utc(startofday(datetime_utc_to_local(now(), \"Europe/Berlin\")), \"Europe/Berlin\");\nNetzfrequenz()\n| where ts >= heute\n| summarize [\"Sekunden gemessen\"] = count(),\n            [\"> ±50 mHz (Sek.)\"] = countif(abs(abweichung_mhz) > 50),\n            [\"> ±100 mHz (Sek.)\"] = countif(abs(abweichung_mhz) > 100),\n            [\"Tiefster Wert (Hz)\"] = round(min(hz), 3),\n            [\"Höchster Wert (Hz)\"] = round(max(hz), 3),\n            [\"Größte Abweichung (mHz)\"] = max(abs(abweichung_mhz))",
+      "id": "977b0a1a-b20d-441e-8d5a-bd666d2cf24f",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel P1: Strompreis jetzt              Visual: Stat (ct/kWh)\n// ------------------------------------------------------------\nenergy_latest\n| where endpoint == \"price\" and ts <= now()\n| top 1 by ts desc\n| project [\"Preis jetzt (ct/kWh)\"] = round(value / 10, 2),\n          Stand = datetime_utc_to_local(ts, \"Europe/Berlin\")",
+      "id": "fcb684fd-97ea-4f90-831c-a3cd12fad7ed",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel P2: Preiskurve heute + morgen     Visual: Column chart oder Line\n//   Zeigt den ganzen heutigen Tag und – ab ca. 13 Uhr – auch morgen.\n// ------------------------------------------------------------\nlet heute = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nenergy_latest\n| where endpoint == \"price\"\n| extend Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| where Zeit >= heute and Zeit < heute + 2d\n| project Zeit,\n          Tag = iff(Zeit < heute + 1d, \"Heute\", \"Morgen\"),\n          [\"ct/kWh\"] = round(value / 10, 2)\n| order by Zeit asc",
+      "id": "536e6926-8881-442c-b138-dd6b241b9e2e",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel P4: Preis vs. Ökostrom-Anteil     Visual: Line chart (2 Achsen)\n//   Zeigt schön: viel Ökostrom = niedriger Preis\n// ------------------------------------------------------------\nlet preis = energy_latest\n    | where endpoint == \"price\" and ts between (_startTime .. _endTime)\n    | project ts, Preis_ct_kWh = round(value / 10, 2);\nlet ee = energy_latest\n    | where endpoint == \"public_power\" and series_id == \"renewable_share_of_load\"\n        and ts between (_startTime .. _endTime)\n    | project ts, EE_Anteil_Prozent = round(value, 1);\npreis\n| join kind=fullouter ee on ts\n| project Zeit = datetime_utc_to_local(coalesce(ts, ts1), \"Europe/Berlin\"),\n          Preis_ct_kWh, EE_Anteil_Prozent\n| order by Zeit asc",
+      "id": "3f0f877b-6730-4cc2-941b-bb5353777c37",
+      "usedVariables": [
+        "_endTime",
+        "_startTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
+      },
+      "text": "// ------------------------------------------------------------\n// Kachel P3: Tagesübersicht heute/morgen   Visual: Table\n// ------------------------------------------------------------\nlet heute = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet basis = energy_latest\n    | where endpoint == \"price\"\n    | extend Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\")\n    | where Zeit >= heute and Zeit < heute + 2d\n    | extend Tag = iff(Zeit < heute + 1d, \"Heute\", \"Morgen\");\nbasis\n| summarize Mittel = avg(value), Hoechst = max(value), Negativ = countif(value < 0) by Tag\n| join kind=inner (basis | summarize arg_min(value, Zeit) by Tag) on Tag\n| project Tag,\n          [\"Ø ct/kWh\"] = round(Mittel / 10, 2),\n          [\"Min ct/kWh\"] = round(value / 10, 2),\n          [\"Günstigste Zeit\"] = format_datetime(Zeit, \"HH:mm\"),\n          [\"Max ct/kWh\"] = round(Hoechst / 10, 2),\n          [\"Negative Viertelstunden\"] = Negativ\n| order by Tag desc",
+      "id": "a0844305-5560-4891-933c-2b9ef53c123e",
+      "usedVariables": []
+    }
+  ],
+  "embeddedApps": []
+}

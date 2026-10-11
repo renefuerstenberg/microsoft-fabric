@@ -1,0 +1,118 @@
+{
+  "queryset": {
+    "version": "1.0.0",
+    "dataSources": [
+      {
+        "id": "710cba50-4849-4de1-8c14-30c3c6bd5c29",
+        "clusterUri": "https://trd-xn6374w4vy1ft204dd.z4.kusto.fabric.microsoft.com",
+        "type": "Fabric",
+        "databaseItemId": "24018399-9b9b-45e2-b363-9d8ec0d8e98c"
+      }
+    ],
+    "tabs": [
+      {
+        "id": "68d288ec-18e0-4a49-8ce8-27df198c4ab4",
+        "content": "//***********************************************************************************************************\n// Here are two articles to help you get started with KQL:\n// KQL reference guide - https://aka.ms/KQLguide\n// SQL - KQL conversions - https://aka.ms/sqlcheatsheet\n//***********************************************************************************************************\n\n// Use \"take\" to view a sample number of records in the table and check the data.\nYOUR_TABLE_HERE\n| take 100\n\n// See how many records are in the table.\nYOUR_TABLE_HERE\n| count\n\n// This query returns the number of ingestions per hour in the given table.\nYOUR_TABLE_HERE\n| summarize IngestionCount = count() by bin(ingestion_time(), 1h)\n\n",
+        "title": "Tab",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "59cc3808-de45-45dd-a7c1-71c7440fe90d",
+        "content": "// ============================================================\n// Energy-Charts → Fabric Eventhouse (Datenbank: eh_1)\n// Jeden Block einzeln im KQL-Queryset ausführen.\n// ============================================================\n\n// ------------------------------------------------------------\n// 1) Rohdaten-Tabelle (append-only, ein Datensatz pro Wert)\n// ------------------------------------------------------------\n.create-merge table energy_raw (\n    endpoint: string,       // public_power | signal | cbpf\n    country: string,        // z. B. \"de\"\n    ts: datetime,           // Beginn des Intervalls (UTC)\n    series_id: string,      // z. B. \"wind_onshore\", \"solar\", \"fr\"\n    series_name: string,    // Anzeigename laut API\n    value: real,\n    unit: string,           // MW, GW, % ...\n    is_forecast: bool,      // true = Intervall lag beim Abruf in der Zukunft\n    generated_at: datetime  // Erzeugungszeitpunkt der API-Antwort (UTC)\n)\n\n// ------------------------------------------------------------\n// 2) JSON-Mapping für den Eventstream\n// ------------------------------------------------------------\n.create-or-alter table energy_raw ingestion json mapping 'energy_raw_json'\n'[{\"column\":\"endpoint\",\"Properties\":{\"Path\":\"$.endpoint\"}},{\"column\":\"country\",\"Properties\":{\"Path\":\"$.country\"}},{\"column\":\"ts\",\"Properties\":{\"Path\":\"$.ts\"}},{\"column\":\"series_id\",\"Properties\":{\"Path\":\"$.series_id\"}},{\"column\":\"series_name\",\"Properties\":{\"Path\":\"$.series_name\"}},{\"column\":\"value\",\"Properties\":{\"Path\":\"$.value\"}},{\"column\":\"unit\",\"Properties\":{\"Path\":\"$.unit\"}},{\"column\":\"is_forecast\",\"Properties\":{\"Path\":\"$.is_forecast\"}},{\"column\":\"generated_at\",\"Properties\":{\"Path\":\"$.generated_at\"}}]'\n\n// 3) Rohdaten dauerhaft aufbewahren (100 Jahre), 30 Tage im Hot Cache\n.alter-merge table energy_raw policy retention softdelete = 36500d recoverability = enabled\n\n.alter table energy_raw policy caching hot = 30d\n\n\n\n// 4) Deduplizierte Sicht: jeweils der zuletzt gelieferte Wert\n//    je Endpoint/Land/Serie/Zeitstempel (spätere Korrekturen gewinnen)\n.create materialized-view with (backfill=true) energy_latest on table energy_raw\n{\n    energy_raw\n    | summarize arg_max(generated_at, value, unit, series_name, is_forecast)\n        by endpoint, country, series_id, ts\n}\n\n\n// 5) Materialized View ebenfalls dauerhaft, 1 Jahr im Hot Cache\n.alter-merge materialized-view energy_latest policy retention softdelete = 36500d recoverability = enabled\n\n.alter materialized-view energy_latest policy caching hot = 365d\n\n\n// 6) Kontrolle\n.show table energy_raw policy retention\n\n.show materialized-view energy_latest policy retention\n\n",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "cf3edefa-f019-4c59-a6a6-ea85a972830e",
+        "content": "energy_raw\n| where ingestion_time() > ago(1h)\n| summarize Zeilen = count() by Eingang = bin(ingestion_time(), 5m)\n| order by Eingang desc\n\n\n\nenergy_latest\n| summarize Werte = count() by endpoint, series_id, series_name, unit\n| order by endpoint asc, series_id asc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "06a30645-4207-4ad1-8eb7-0d57654c8007",
+        "content": "energy_latest\n| where endpoint == \"cbpf\" and series_id != \"sum\" and ts > ago(8h)\n| summarize Laender_mit_Wert = countif(value != 0), Summe_GW = round(sum(value), 2) by ts\n| order by ts desc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "ff4701c9-6491-4fb1-8eac-14fdec51ae1a",
+        "content": "energy_raw\n| where endpoint == \"public_power\" and ts > ago(1d)\n| summarize value = take_any(value) by series_id, ts, generated_at\n| order by series_id asc, ts asc, generated_at asc\n| extend geaendert = series_id == prev(series_id) and ts == prev(ts) and value != prev(value)\n| where geaendert\n| extend Alter_h = (generated_at - ts) / 1h\n| summarize Korrekturen = count(),\n            Max_Alter_h = round(max(Alter_h), 1),\n            P95_Alter_h = round(percentile(Alter_h, 95), 1)",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "3192d9c4-cd53-462d-9569-8189615e3c59",
+        "content": "energy_latest\n| where endpoint == \"public_power\" and ts == datetime(2026-10-08 10:00)\n| project series_name, MW = round(value, 0)\n| order by MW desc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "3b95c419-e374-49ce-8c97-c32847e72cbc",
+        "content": "energy_raw\n| where endpoint == \"public_power\" and ts > ago(1d)\n| summarize value = take_any(value) by series_id, ts, generated_at\n| order by series_id asc, ts asc, generated_at asc\n| extend geaendert = series_id == prev(series_id) and ts == prev(ts) and value != prev(value)\n| where geaendert\n| extend Alter_h = (generated_at - ts) / 1h\n| summarize Korrekturen = count() by Alter = bin(Alter_h, 0.5)\n| order by Alter asc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "7de34830-843f-4056-8929-2dda9d625b31",
+        "content": "energy_raw\n| where ingestion_time() > ago(30m) and ts < ago(6h)\n| summarize Zeilen = count(), Aeltester = min(ts), Juengster = max(ts) by endpoint\n\n\nlet nachher = energy_raw\n    | where ingestion_time() > ago(30m) and endpoint == \"public_power\" and ts < ago(6h)\n    | summarize arg_max(generated_at, value) by series_id, ts;\nlet vorher = energy_raw\n    | where ingestion_time() <= ago(30m) and endpoint == \"public_power\"\n    | summarize arg_max(generated_at, value) by series_id, ts;\nnachher\n| join kind=inner vorher on series_id, ts\n| extend Diff = value - value1\n| summarize Werte_verglichen = count(),\n            Davon_korrigiert = countif(abs(Diff) > 0.01),\n            Max_Abweichung_MW = round(max(abs(Diff)), 1)\n\n\n\nenergy_latest\n| where endpoint == \"public_power\" and ts == datetime(2026-10-08 10:00)\n| project series_name, MW = round(value, 0)\n| order by MW desc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "84e7f277-1b66-466f-9c9c-34140bfbe5b1",
+        "content": "energy_latest\n| where endpoint == \"price\"\n| summarize Werte = count(), Von = min(ts), Bis = max(ts) by series_id, series_name, unit",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "abc43644-2daa-4b7d-942c-cdac1e9f4138",
+        "content": "energy_latest\n| where endpoint == \"cbpf\" and series_id == \"sweden\" and ts > ago(2d)\n| project Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"), GW = value\n| order by Zeit desc\n\n\nenergy_raw\n| where endpoint == \"cbpf\" and series_id == \"sweden\" and ts > ago(12h)\n| summarize Werte = make_set(value), Erster_Abruf = min(generated_at), Letzter_Abruf = max(generated_at) by ts\n| project Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\"), Werte, Erster_Abruf, Letzter_Abruf\n| order by Zeit desc\n\n\n\nlet Laender = datatable(series_id: string, Land: string)\n[\n    \"austria\", \"Österreich\", \"belgium\", \"Belgien\", \"czech_republic\", \"Tschechien\",\n    \"denmark\", \"Dänemark\", \"france\", \"Frankreich\", \"luxembourg\", \"Luxemburg\",\n    \"netherlands\", \"Niederlande\", \"norway\", \"Norwegen\", \"poland\", \"Polen\",\n    \"sweden\", \"Schweden\", \"switzerland\", \"Schweiz\"\n];\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Gemeldet = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet voll11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 11 | summarize max(ts));\nlet voll10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 10 | summarize max(ts));\nlet LetzterVollstaendig = iff(isnotnull(voll11) and voll11 >= cbpf_max - 6h, voll11, voll10);\nenergy_latest\n| where endpoint == \"cbpf\" and ts == LetzterVollstaendig\n| join kind=inner Laender on series_id\n| project Land, GW = round(value, 2)\n| order by GW desc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "b1b1b6ad-228b-42e2-8170-86d9ed08ef90",
+        "content": "let cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Gemeldet = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet voll11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 11 | summarize max(ts));\nlet voll10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Gemeldet >= 10 | summarize max(ts));\nlet LetzterVollstaendig = iff(isnotnull(voll11) and voll11 >= cbpf_max - 6h, voll11, voll10);\nenergy_latest\n| where endpoint == \"cbpf\" and ts == LetzterVollstaendig\n| summarize Summe_Laender = round(sumif(value, series_id != \"sum\"), 2),\n            API_Summe = round(maxif(value, series_id == \"sum\"), 2),\n            Laender_gemeldet = countif(series_id != \"sum\" and value != 0)\n| extend Stand = datetime_utc_to_local(LetzterVollstaendig, \"Europe/Berlin\")",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "2ef1308b-077e-4aeb-ad0d-92396f94f6c6",
+        "content": "// ------------------------------------------------------------\n// E1) Tabelle für Sekundenwerte\n// ------------------------------------------------------------\n.create-merge table frequency_raw (\n    ts: datetime,           // Sekunde der Messung (UTC)\n    hz: real,               // Netzfrequenz in Hertz\n    generated_at: datetime  // Erzeugungszeitpunkt der API-Antwort (UTC)\n)\n\n\n// ------------------------------------------------------------\n// E2) Dauerhaft aufbewahren, 7 Tage im Hot Cache\n// ------------------------------------------------------------\n.alter-merge table frequency_raw policy retention softdelete = 36500d recoverability = enabled\n\n.alter table frequency_raw policy caching hot = 7d\n\n\n// ------------------------------------------------------------\n// E3) Deduplizierte Sekundenwerte (nach Neustarts der Funktion\n//     können Sekunden doppelt ankommen)\n// ------------------------------------------------------------\n.create materialized-view with (backfill=true) frequency_1s on table frequency_raw\n{\n    frequency_raw\n    | summarize hz = take_any(hz) by ts\n}\n\n.alter-merge materialized-view frequency_1s policy retention softdelete = 36500d recoverability = enabled\n\n\n\n// ------------------------------------------------------------\n// E4) Minuten-Sicht: Min/Mittel/Max pro Minute\n//     Für schnelle Auswertungen über Tage, Wochen, Monate.\n// ------------------------------------------------------------\n.create materialized-view with (backfill=true) frequency_1min on table frequency_raw\n{\n    frequency_raw\n    | summarize hz_min = min(hz), hz_avg = avg(hz), hz_max = max(hz), werte = count()\n        by ts = bin(ts, 1m)\n}\n\n.alter-merge materialized-view frequency_1min policy retention softdelete = 36500d recoverability = enabled\n\n.alter materialized-view frequency_1min policy caching hot = 365d\n\n\n\n// ------------------------------------------------------------\n// E5) Komfort-Funktion – Nutzung einfach als:  Netzfrequenz()\n// ------------------------------------------------------------\n.create-or-alter function with (folder = \"Strom\", docstring = \"Netzfrequenz in Sekundenauflösung (dedupliziert)\")\nNetzfrequenz() {\n    frequency_1s\n    | project ts, hz, abweichung_mhz = round((hz - 50) * 1000, 1)\n}",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "ba9032c1-00a5-4790-8a9a-53bde4a47757",
+        "content": "energy_raw\n| where ingestion_time() > ago(30m)\n| summarize Zeilen = count(),\n            ts_leer = countif(isnull(ts)),\n            value_leer = countif(isnull(value)),\n            Frequenz_falsch_hier = countif(endpoint == \"frequency\")\n    by Eingang = bin(ingestion_time(), 5m)\n| order by Eingang desc\n\n\n\nfrequency_raw\n| where ingestion_time() > ago(30m)\n| summarize Zeilen = count(), ts_leer = countif(isnull(ts)), hz_leer = countif(isnull(hz))\n\n\nNetzfrequenz()\n| summarize Werte = count(), Von = min(ts), Bis = max(ts),\n            Verzoegerung_s = datetime_diff(\"second\", now(), max(ts)),\n            Min_Hz = min(hz), Max_Hz = max(hz)",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "c4331ec3-4ac8-40df-b8b5-c6f45726edda",
+        "content": "frequency_raw\n| where ingestion_time() > ago(30m)\n| summarize Zeilen = count(), ts_leer = countif(isnull(ts)), hz_leer = countif(isnull(hz))\n\n\nNetzfrequenz()\n| summarize Werte = count(), Von = min(ts), Bis = max(ts),\n            Verzoegerung_s = datetime_diff(\"second\", now(), max(ts)),\n            Min_Hz = min(hz), Max_Hz = max(hz)",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "0cefda8c-ecdc-47ff-a9a0-268e8231261d",
+        "content": "energy_latest\n| where endpoint == \"price\"\n| extend Zeit = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| where Zeit between (datetime_utc_to_local(now() - 3h, \"Europe/Berlin\") .. datetime_utc_to_local(now() + 3h, \"Europe/Berlin\"))\n| project Zeit, EUR_MWh = value, ct_kWh = value / 10\n| order by Zeit asc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "c3a1af6a-2f50-44a9-9f5d-61eb1fdf5bd9",
+        "content": "Netzfrequenz()\n| where ts > ago(1d)\n| order by ts asc\n| extend vorher = prev(ts)\n| extend Luecke_s = datetime_diff(\"second\", ts, vorher)\n| where Luecke_s > 5\n| project Luecke_von = datetime_utc_to_local(vorher, \"Europe/Berlin\"),\n          Luecke_bis = datetime_utc_to_local(ts, \"Europe/Berlin\"),\n          Luecke_s\n\n\n\nfrequency_raw\n| where ingestion_time() > ago(30m)\n| summarize Zeilen = count(),\n            Aeltester = datetime_utc_to_local(min(ts), \"Europe/Berlin\"),\n            Juengster = datetime_utc_to_local(max(ts), \"Europe/Berlin\")\n\n\nfrequency_raw\n| where ts between (datetime(2026-10-09 23:59:40) .. datetime(2026-10-10 00:00:10))\n| summarize Anzahl_Lieferungen = count(), hz = take_any(hz) by ts\n| extend Ortszeit = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| order by ts asc\n\nNetzfrequenz()\n| where ts between (datetime(2026-10-10 23:50:00) .. datetime(2026-10-11 00:00:30))\n| order by ts asc\n| extend Letzter_Wert_davor = prev(ts)\n| extend Luecke_s = datetime_diff(\"second\", ts, Letzter_Wert_davor)\n| where Luecke_s > 1\n| project Letzter_Wert_davor, Naechster_Wert = ts, Fehlende_Sekunden = Luecke_s - 1\n\n\nNetzfrequenz()\n| where ts > ago(7d)\n| order by ts asc\n| extend Letzter_Wert_davor = prev(ts)\n| extend Fehlende_Sekunden = datetime_diff(\"second\", ts, Letzter_Wert_davor) - 1\n| where Fehlende_Sekunden > 0\n| project Von_lokal = datetime_utc_to_local(Letzter_Wert_davor, \"Europe/Berlin\"),\n          Bis_lokal = datetime_utc_to_local(ts, \"Europe/Berlin\"),\n          Fehlende_Sekunden\n| order by Von_lokal desc",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      },
+      {
+        "id": "ac05f735-641b-4dd8-b637-0f5d5fea8880",
+        "content": ".create-or-alter function with (folder = \"Power\", docstring = \"Grid frequency in second resolution (deduplicated)\")\nGridFrequency() {\n    frequency_1s\n    | project ts, hz, deviation_mhz = round((hz - 50) * 1000, 1)\n}\n\n\nGridFrequency()\n| summarize Values = count(), From = min(ts), To = max(ts)\n\n\n.create materialized-view with (backfill=true) frequency_1min on table frequency_raw\n{\n    frequency_raw\n    | summarize hz_min = min(hz), hz_avg = avg(hz), hz_max = max(hz), samples = count()\n        by ts = bin(ts, 1m)\n}\n\n\n.alter-merge materialized-view frequency_1min policy retention softdelete = 36500d recoverability = enabled\n\n\n\n.alter materialized-view frequency_1min policy caching hot = 365d\n\n\nfrequency_1min\n| summarize Minutes = count(), From = min(ts), To = max(ts), Avg_samples = avg(samples)",
+        "title": "",
+        "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
+      }
+    ],
+    "querysetType": "Embedded"
+  }
+}
