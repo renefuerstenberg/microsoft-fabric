@@ -698,7 +698,7 @@
       "endVariableName": "_endTime",
       "defaultValue": {
         "kind": "dynamic",
-        "count": 1,
+        "count": 24,
         "unit": "hours"
       },
       "showOnPages": {
