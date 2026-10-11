@@ -370,8 +370,7 @@ complete list.
 
 ## Real-Time Dashboard
 
-Parameter **Time range** (`_startTime` / `_endTime`) is shown on all pages. Recommended
-default: last 24 hours. All times are displayed in local time (Europe/Berlin).
+Parameter **Time range** (`_startTime` / `_endTime`) is shown on all pages, default: **last 24 hours**. All times are displayed in local time (Europe/Berlin).
 Queries: `Fabric/kql/02`–`04`. The complete definition is in `Power Mix Germany.KQLDashboard/`.
 
 ### Page 1 – Grid Live
