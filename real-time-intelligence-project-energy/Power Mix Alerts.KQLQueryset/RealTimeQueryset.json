@@ -24,7 +24,7 @@
       },
       {
         "id": "c2478de1-36b6-4a12-aae8-200aebfc992c",
-        "content": "let tomorrow = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\")) + 1d;\nenergy_latest\n| where endpoint == \"price\"\n| extend Time = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| where Time >= tomorrow and Time < tomorrow + 1d\n| summarize NegativeQuarterHoursTomorrow = countif(value < 0),\n            MinPrice_ct_kWh = round(min(value) / 10, 2)\n| render card",
+        "content": "let tomorrow = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\")) + 1d;\nenergy_latest\n| where endpoint == \"price\"\n| extend Time = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| where Time >= tomorrow and Time < tomorrow + 1d\n| summarize NegativeQuarterHoursTomorrow = countif(value < 0),\n            MinPrice_ct_kWh = round(min(value) / 10, 2)\n| render card\n",
         "title": "Alert 5: Negative Prices Tomorrow",
         "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
       },
@@ -42,7 +42,7 @@
       },
       {
         "id": "7f271e94-16b1-4f5e-8b9c-9e6a91dd247e",
-        "content": "let latest = toscalar(GridFrequency() | summarize max(ts));\nGridFrequency()\n| where ts > latest - 5m\n| summarize MaxDeviation_mHz = max(abs(deviation_mhz)),\n            Lowest_Hz = round(min(hz), 3),\n            Highest_Hz = round(max(hz), 3)\n| extend AsOf = datetime_utc_to_local(latest, \"Europe/Berlin\")\n| render card",
+        "content": "let last_ts = toscalar(GridFrequency() | summarize max(ts));\nGridFrequency()\n| where ts > last_ts - 6m\n| summarize MaxDeviation_mHz = max(abs(deviation_mhz)),\n            Lowest_Hz = round(min(hz), 3),\n            Highest_Hz = round(max(hz), 3)\n| extend AsOf = datetime_utc_to_local(last_ts, \"Europe/Berlin\")\n| render card",
         "title": "Alert 7: Frequency Deviation",
         "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
       }
