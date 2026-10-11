@@ -217,7 +217,7 @@
     },
     {
       "id": "95de8a79-e096-4eb5-9577-c02cc82f6bbd",
-      "title": "Cross-Border Flows by Country",
+      "title": "Cross-Border Flows by Country (MW)",
       "visualType": "bar",
       "pageId": "cb20dbe8-94b1-47e4-a96b-fd34d02afb89",
       "layout": {
@@ -249,8 +249,10 @@
         "hideLegend": false,
         "legendLocation": "bottom",
         "xColumnTitle": "",
-        "xColumn": null,
-        "yColumns": null,
+        "xColumn": "Country",
+        "yColumns": [
+          "MW"
+        ],
         "seriesColumns": null,
         "xAxisScale": "linear",
         "verticalLine": "",
@@ -797,7 +799,7 @@
         "kind": "inline",
         "dataSourceId": "87f8e065-cc3f-4dcc-913b-f3dce6bfedc0"
       },
-      "text": "// Cross-border flows per neighbour country (positive = import into Germany)\nlet Countries = datatable(series_id: string, Country: string)\n[\n    \"austria\", \"Austria\", \"belgium\", \"Belgium\", \"czech_republic\", \"Czech Republic\",\n    \"denmark\", \"Denmark\", \"france\", \"France\", \"luxembourg\", \"Luxembourg\",\n    \"netherlands\", \"Netherlands\", \"norway\", \"Norway\", \"poland\", \"Poland\",\n    \"sweden\", \"Sweden\", \"switzerland\", \"Switzerland\"\n];\n// Latest completely reported quarter-hour: all 11 countries (at least 30 min\n// before the newest timestamp); if none within 6 h, at least 10 of 11.\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and ts == LatestComplete\n| join kind=inner Countries on series_id\n| project Country, GW = round(value, 2)\n| order by GW desc",
+      "text": "// Cross-border flows per neighbour country in MW (positive = import into Germany)\nlet Countries = datatable(series_id: string, Country: string)\n[\n    \"austria\", \"Austria\", \"belgium\", \"Belgium\", \"czech_republic\", \"Czech Republic\",\n    \"denmark\", \"Denmark\", \"france\", \"France\", \"luxembourg\", \"Luxembourg\",\n    \"netherlands\", \"Netherlands\", \"norway\", \"Norway\", \"poland\", \"Poland\",\n    \"sweden\", \"Sweden\", \"switzerland\", \"Switzerland\"\n];\n// Latest completely reported quarter-hour: all 11 countries (at least 30 min\n// before the newest timestamp); if none within 6 h, at least 10 of 11.\nlet cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and ts == LatestComplete\n| join kind=inner Countries on series_id\n| project Country, MW = round(value * 1000, 0)\n| order by MW desc",
       "id": "6fd23d65-732e-4320-9217-a004a1e323d7",
       "usedVariables": []
     },

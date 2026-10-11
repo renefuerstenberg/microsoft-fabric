@@ -3,7 +3,7 @@
   "metadata": {
     "type": "KQLDashboard",
     "displayName": "Power Mix Germany",
-    "description": ""
+    "description": "Power Mix Germany"
   },
   "config": {
     "version": "2.0",
