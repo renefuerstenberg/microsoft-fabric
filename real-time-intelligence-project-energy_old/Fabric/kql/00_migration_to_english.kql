@@ -1,0 +1,76 @@
+// ============================================================
+// One-time migration of the existing installation to English names
+// Database eh_1. Run the blocks separately and in this order.
+//
+// Unchanged: tables energy_raw / frequency_raw, materialized views
+// energy_latest / frequency_1s and all their columns (already English).
+//
+// Changed:
+//   - Function Netzfrequenz() (column abweichung_mhz)
+//       -> GridFrequency() (column deviation_mhz)
+//   - Materialized view frequency_1min: column werte -> samples
+//
+// Order of the overall switch-over:
+//   Step 1  this file, blocks M1 + M2
+//   Step 2  update all dashboard tiles (02, 03, 04)
+//   Step 3  create the 7 new alerts (05), then delete the old rules
+//   Step 4  this file, block M3 (remove the old function)
+// ============================================================
+
+
+// ------------------------------------------------------------
+// M1) New function GridFrequency()
+//     The old function Netzfrequenz() remains for now, so the
+//     existing tiles and alerts keep working during the switch-over.
+// ------------------------------------------------------------
+.create-or-alter function with (folder = "Power", docstring = "Grid frequency in second resolution (deduplicated)")
+GridFrequency() {
+    frequency_1s
+    | project ts, hz, deviation_mhz = round((hz - 50) * 1000, 1)
+}
+
+// Check: should return the same number of rows as Netzfrequenz()
+GridFrequency()
+| summarize Values = count(), From = min(ts), To = max(ts)
+
+
+// ------------------------------------------------------------
+// M2) Recreate frequency_1min with the column "samples"
+//     No data is lost: the view is completely rebuilt from
+//     frequency_raw (backfill=true), which is kept permanently.
+//     The tile "Frequency Band over Time" only uses hz_min/hz_avg/hz_max
+//     and is empty for a few seconds to minutes while the backfill runs.
+//     Run the four commands one after another.
+// ------------------------------------------------------------
+.drop materialized-view frequency_1min
+
+.create materialized-view with (backfill=true) frequency_1min on table frequency_raw
+{
+    frequency_raw
+    | summarize hz_min = min(hz), hz_avg = avg(hz), hz_max = max(hz), samples = count()
+        by ts = bin(ts, 1m)
+}
+
+.alter-merge materialized-view frequency_1min policy retention softdelete = 36500d recoverability = enabled
+
+.alter materialized-view frequency_1min policy caching hot = 365d
+
+// Check: view is healthy and the policies are set
+.show materialized-view frequency_1min
+
+.show materialized-view frequency_1min policy retention
+
+frequency_1min
+| summarize Minutes = count(), From = min(ts), To = max(ts), Avg_samples = avg(samples)
+
+
+// ------------------------------------------------------------
+// M3) Remove the old function – ONLY after all dashboard tiles and
+//     alerts use GridFrequency() (steps 2 and 3).
+//     If a tile or alert still uses Netzfrequenz(), it will fail
+//     afterwards; the function can be recreated at any time.
+// ------------------------------------------------------------
+.drop function Netzfrequenz
+
+// Check: only GridFrequency should be listed
+.show functions

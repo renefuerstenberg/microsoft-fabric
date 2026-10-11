@@ -1,0 +1,186 @@
+// ============================================================
+// Grid frequency – separate table frequency_raw
+// Database eh_1. Events come from FrequencyIngest (endpoint ==
+// "frequency") and are routed here by a filter in the Eventstream;
+// "Manage fields" renames value -> hz.
+//
+// Also contains the tiles of dashboard page 3: "Grid Frequency".
+//
+// Nominal value: 50 Hz. Deviations in mHz (1 mHz = 0.001 Hz).
+//   ±20 mHz   normal range
+//   ±50 mHz   noticeable (often at full hours due to power plant schedules)
+//   ±100 mHz  rare – larger event in the European grid
+//   ±200 mHz  frequency containment reserve fully activated
+//
+// Known source gap: the measurement in Freiburg delivers null values
+// for a few seconds up to about a minute every day shortly before
+// midnight UTC (e.g. 2026-10-10 23:58:53–23:59:59 UTC). These seconds
+// are never published; the gap is expected and not a pipeline error.
+// ============================================================
+
+
+// ============================================================
+// SETUP for a new installation (run each block separately)
+// An existing installation is converted with 00_migration_to_english.kql.
+// ============================================================
+
+// ------------------------------------------------------------
+// E1) Table for second values
+// ------------------------------------------------------------
+.create-merge table frequency_raw (
+    ts: datetime,           // second of the measurement (UTC)
+    hz: real,               // grid frequency in hertz
+    generated_at: datetime  // creation time of the API response (UTC)
+)
+
+// ------------------------------------------------------------
+// E2) Keep permanently, 7 days in the hot cache
+// ------------------------------------------------------------
+.alter-merge table frequency_raw policy retention softdelete = 36500d recoverability = enabled
+
+.alter table frequency_raw policy caching hot = 7d
+
+// ------------------------------------------------------------
+// E3) Deduplicated second values (after restarts of the function
+//     or backfill runs, seconds can arrive more than once)
+// ------------------------------------------------------------
+.create materialized-view with (backfill=true) frequency_1s on table frequency_raw
+{
+    frequency_raw
+    | summarize hz = take_any(hz) by ts
+}
+
+.alter-merge materialized-view frequency_1s policy retention softdelete = 36500d recoverability = enabled
+
+// ------------------------------------------------------------
+// E4) Minute view: min/avg/max per minute
+//     For fast analyses over days, weeks and months.
+// ------------------------------------------------------------
+.create materialized-view with (backfill=true) frequency_1min on table frequency_raw
+{
+    frequency_raw
+    | summarize hz_min = min(hz), hz_avg = avg(hz), hz_max = max(hz), samples = count()
+        by ts = bin(ts, 1m)
+}
+
+.alter-merge materialized-view frequency_1min policy retention softdelete = 36500d recoverability = enabled
+
+.alter materialized-view frequency_1min policy caching hot = 365d
+
+// ------------------------------------------------------------
+// E5) Convenience function – use simply as:  GridFrequency()
+// ------------------------------------------------------------
+.create-or-alter function with (folder = "Power", docstring = "Grid frequency in second resolution (deduplicated)")
+GridFrequency() {
+    frequency_1s
+    | project ts, hz, deviation_mhz = round((hz - 50) * 1000, 1)
+}
+
+
+// ============================================================
+// CHECKS
+// ============================================================
+
+// Are second values arriving? Latency should be about 2 minutes.
+GridFrequency()
+| summarize Values = count(), From = min(ts), To = max(ts),
+            Delay_s = datetime_diff("second", now(), max(ts)),
+            Min_Hz = min(hz), Max_Hz = max(hz)
+
+// Raw data: are all columns filled?
+frequency_raw
+| where ingestion_time() > ago(30m)
+| summarize Rows = count(), ts_empty = countif(isnull(ts)), hz_empty = countif(isnull(hz))
+
+// Gaps of the last 7 days (local time).
+// Expected: only the short nightly source gap before midnight UTC
+// (currently shortly before 02:00 local time, in winter before 01:00).
+// Any other gap should be investigated; compare with the source:
+// https://api.energy-charts.info/v2/frequency?region=DE-Freiburg&start=<UTC>&end=<UTC>
+GridFrequency()
+| where ts > ago(7d)
+| order by ts asc
+| extend PreviousValue = prev(ts)
+| extend MissingSeconds = datetime_diff("second", ts, PreviousValue) - 1
+| where MissingSeconds > 0
+| project GapStart_local = datetime_utc_to_local(PreviousValue, "Europe/Berlin"),
+          GapEnd_local = datetime_utc_to_local(ts, "Europe/Berlin"),
+          MissingSeconds
+| order by GapStart_local desc
+
+
+// ============================================================
+// DASHBOARD TILES (page "Grid Frequency")
+//
+// Layout:
+//   Row 1: Grid Frequency Now | Deviations Today
+//   Row 2: Frequency – Last Hour (full width)
+//   Row 3: Frequency Band over Time (full width)
+//   Row 4: Data Sources (Markdown, full width)
+// ============================================================
+
+// ------------------------------------------------------------
+// F1: Grid Frequency Now                     Visual: Stat (3 decimals)
+// Description: Latest measured grid frequency of the Continental
+//   European grid (measured in Freiburg, about 2 minutes delay).
+//   Nominal value 50 Hz; the deviation is shown in millihertz.
+// ------------------------------------------------------------
+GridFrequency()
+| top 1 by ts desc
+| project ["Frequency (Hz)"] = round(hz, 3),
+          ["Deviation (mHz)"] = deviation_mhz,
+          ["As of"] = datetime_utc_to_local(ts, "Europe/Berlin")
+
+
+// ------------------------------------------------------------
+// F2: Frequency – Last Hour                  Visual: Line chart
+//     Y axis: min 49.9, max 50.1; reference line at 50
+//     Fixed window of 1 hour (independent of the time range parameter),
+//     because second values over longer periods are too many points.
+// Description: Grid frequency second by second for the last hour.
+//   Above 50 Hz there is more generation than consumption, below 50 Hz
+//   less. Jumps at full hours are typical (power plant schedules).
+// ------------------------------------------------------------
+GridFrequency()
+| where ts > ago(1h)
+| project Time = datetime_utc_to_local(ts, "Europe/Berlin"), ["Frequency (Hz)"] = hz
+| order by Time asc
+
+
+// ------------------------------------------------------------
+// F3: Frequency Band over Time               Visual: Line chart
+//     Minute min/avg/max; uses the dashboard time range parameter.
+// Description: Lowest, average and highest frequency per minute for the
+//   selected time range. The wider the band, the more restless the grid.
+// ------------------------------------------------------------
+frequency_1min
+| where ts between (_startTime .. _endTime)
+| project Time = datetime_utc_to_local(ts, "Europe/Berlin"),
+          ["Minimum"] = round(hz_min, 3),
+          ["Average"] = round(hz_avg, 3),
+          ["Maximum"] = round(hz_max, 3)
+| order by Time asc
+
+
+// ------------------------------------------------------------
+// F4: Deviations Today                       Visual: Table
+// Description: Statistics for the current day (local time): measured
+//   seconds, seconds with a deviation of more than 50 or 100 mHz,
+//   lowest and highest value and the largest deviation from 50 Hz.
+// ------------------------------------------------------------
+let today = datetime_local_to_utc(startofday(datetime_utc_to_local(now(), "Europe/Berlin")), "Europe/Berlin");
+GridFrequency()
+| where ts >= today
+| summarize ["Seconds measured"] = count(),
+            ["> ±50 mHz (s)"] = countif(abs(deviation_mhz) > 50),
+            ["> ±100 mHz (s)"] = countif(abs(deviation_mhz) > 100),
+            ["Lowest (Hz)"] = round(min(hz), 3),
+            ["Highest (Hz)"] = round(max(hz), 3),
+            ["Max deviation (mHz)"] = max(abs(deviation_mhz))
+
+
+// ------------------------------------------------------------
+// Tile: Data Sources                         Visual: Markdown tile
+// Content (copy into the Markdown tile, without the leading //):
+// ------------------------------------------------------------
+// **Data:** [Energy-Charts.info](https://energy-charts.info) – grid frequency measured at Fraunhofer ISE, Freiburg (CC BY 4.0)

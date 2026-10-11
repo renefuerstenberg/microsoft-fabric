@@ -1,0 +1,7 @@
+.venv
+local.settings.json
+__pycache__
+.vscode
+.azurite
+kql
+README.md
