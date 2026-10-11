@@ -433,7 +433,7 @@ All rules live in the Activator **Power Mix Activator** and use the queries of t
 | 4 | Data Outage | `MinutesWithoutData` | increases above 30 | 5 min |
 | 5 | Negative Prices Tomorrow | `NegativeQuarterHoursTomorrow` | increases above 0 | 15 min |
 | 6 | Price Negative Now | `Price_ct_kWh` | decreases below 0 | 15 min |
-| 7 | Frequency Deviation | `MaxDeviation_mHz` | increases above 100 | 5 min |
+| 7 | Frequency Deviation | `MaxDeviation_mHz` (max. of the last 6 min of data) | increases above 100 | 5 min |
 
 How the rules work:
 
@@ -583,6 +583,7 @@ nightly gap before midnight UTC is expected.
 | Cross-border tiles show only a few countries | Recent quarter-hours incomplete | Expected; the completeness rule shows the latest complete timestamp |
 | Frequency gap other than at midnight UTC | Function restart or outage longer than 30 min | Wait for the next EnergyBackfill (every 3 h) or start it manually; compare with the source URL |
 | Tile shows "function not found" | Query still uses an old function name | Update the query to `GridFrequency()` |
+| `Syntax error: The incomplete fragment is unexpected`, no syntax colouring, `let` underlined | A reserved word is used as a variable name (e.g. `let latest = …`) | Rename the variable (e.g. `last_ts`) |
 
 ---
 
