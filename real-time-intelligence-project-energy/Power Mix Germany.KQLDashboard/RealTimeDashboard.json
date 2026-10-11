@@ -610,7 +610,7 @@
                 "Renewable_Share_Pct"
               ],
               "label": "Renewable share (%)",
-              "yAxisMaximumValue": 120,
+              "yAxisMaximumValue": 160,
               "yAxisMinimumValue": 0,
               "yAxisScale": "linear",
               "horizontalLines": [
