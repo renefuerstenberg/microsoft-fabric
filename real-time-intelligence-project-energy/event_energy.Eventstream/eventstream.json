@@ -160,6 +160,193 @@
   ],
   "operators": [
     {
+      "name": "energy_fields",
+      "type": "ManageFields",
+      "inputNodes": [
+        {
+          "name": "without_frequency"
+        }
+      ],
+      "properties": {
+        "columns": [
+          {
+            "type": "Rename",
+            "properties": {
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "endpoint",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "endpoint"
+          },
+          {
+            "type": "Rename",
+            "properties": {
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "country",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "country"
+          },
+          {
+            "type": "Cast",
+            "properties": {
+              "targetDataType": "DateTime",
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "ts",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "ts"
+          },
+          {
+            "type": "Rename",
+            "properties": {
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "series_id",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "series_id"
+          },
+          {
+            "type": "Rename",
+            "properties": {
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "series_name",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "series_name"
+          },
+          {
+            "type": "Cast",
+            "properties": {
+              "targetDataType": "Float",
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "value",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "value"
+          },
+          {
+            "type": "Rename",
+            "properties": {
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "unit",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "unit"
+          },
+          {
+            "type": "Rename",
+            "properties": {
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "is_forecast",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "is_forecast"
+          },
+          {
+            "type": "Cast",
+            "properties": {
+              "targetDataType": "DateTime",
+              "column": {
+                "expressionType": "ColumnReference",
+                "node": null,
+                "columnName": "generated_at",
+                "columnPathSegments": []
+              }
+            },
+            "alias": "generated_at"
+          }
+        ]
+      },
+      "inputSchemas": [
+        {
+          "name": "without_frequency",
+          "schema": {
+            "columns": [
+              {
+                "name": "endpoint",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "country",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "ts",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "series_id",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "series_name",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "value",
+                "type": "BigInt",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "unit",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "is_forecast",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              },
+              {
+                "name": "generated_at",
+                "type": "Nvarchar(max)",
+                "fields": null,
+                "items": null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "frequency_fields",
       "type": "ManageFields",
       "inputNodes": [
@@ -393,193 +580,6 @@
       "inputSchemas": [
         {
           "name": "event_energy-stream",
-          "schema": {
-            "columns": [
-              {
-                "name": "endpoint",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "country",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "ts",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "series_id",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "series_name",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "value",
-                "type": "BigInt",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "unit",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "is_forecast",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              },
-              {
-                "name": "generated_at",
-                "type": "Nvarchar(max)",
-                "fields": null,
-                "items": null
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "energy_fields",
-      "type": "ManageFields",
-      "inputNodes": [
-        {
-          "name": "without_frequency"
-        }
-      ],
-      "properties": {
-        "columns": [
-          {
-            "type": "Rename",
-            "properties": {
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "endpoint",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "endpoint"
-          },
-          {
-            "type": "Rename",
-            "properties": {
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "country",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "country"
-          },
-          {
-            "type": "Cast",
-            "properties": {
-              "targetDataType": "DateTime",
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "ts",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "ts"
-          },
-          {
-            "type": "Rename",
-            "properties": {
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "series_id",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "series_id"
-          },
-          {
-            "type": "Rename",
-            "properties": {
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "series_name",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "series_name"
-          },
-          {
-            "type": "Cast",
-            "properties": {
-              "targetDataType": "Float",
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "value",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "value"
-          },
-          {
-            "type": "Rename",
-            "properties": {
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "unit",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "unit"
-          },
-          {
-            "type": "Rename",
-            "properties": {
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "is_forecast",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "is_forecast"
-          },
-          {
-            "type": "Cast",
-            "properties": {
-              "targetDataType": "DateTime",
-              "column": {
-                "expressionType": "ColumnReference",
-                "node": null,
-                "columnName": "generated_at",
-                "columnPathSegments": []
-              }
-            },
-            "alias": "generated_at"
-          }
-        ]
-      },
-      "inputSchemas": [
-        {
-          "name": "without_frequency",
           "schema": {
             "columns": [
               {
