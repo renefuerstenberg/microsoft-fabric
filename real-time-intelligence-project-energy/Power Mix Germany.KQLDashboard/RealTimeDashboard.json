@@ -512,7 +512,7 @@
         "x": 0,
         "y": 0,
         "width": 5,
-        "height": 3
+        "height": 4
       },
       "queryRef": {
         "kind": "query",
@@ -533,7 +533,7 @@
       "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
       "layout": {
         "x": 0,
-        "y": 3,
+        "y": 4,
         "width": 24,
         "height": 4
       },
@@ -579,7 +579,7 @@
       "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 8,
         "width": 24,
         "height": 6
       },
@@ -655,7 +655,7 @@
         "x": 5,
         "y": 0,
         "width": 19,
-        "height": 3
+        "height": 4
       },
       "queryRef": {
         "kind": "query",
@@ -679,7 +679,7 @@
       "pageId": "94179190-3f8c-4538-9ce8-0e4045e5101b",
       "layout": {
         "x": 0,
-        "y": 13,
+        "y": 14,
         "width": 24,
         "height": 3
       },
