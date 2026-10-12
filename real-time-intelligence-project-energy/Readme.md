@@ -1,4 +1,4 @@
-# Power Mix Germany – Real-Time Intelligence with Energy-Charts
+# Power Mix Germany - Real-Time Intelligence with Energy-Charts
 
 A real-time data pipeline for the German power grid built on **Microsoft Fabric Real-Time
 Intelligence**. Azure Functions poll the public Energy-Charts API of Fraunhofer ISE. A Fabric
