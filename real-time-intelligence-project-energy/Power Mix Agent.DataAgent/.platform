@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataAgent",
+    "displayName": "Power Mix Agent"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "4419a9c6-cccf-bec4-4b04-f6e50a7af6da"
+  }
+}
