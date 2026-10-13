@@ -181,9 +181,8 @@ GridFrequency()
 // ------------------------------------------------------------
 // Tile: Data Sources                         Visual: Markdown tile
 // CC BY 4.0: creator, licence link, source link, note on changes.
-// Check the "license" field of the API response
-// (https://api.energy-charts.info/v2/frequency?region=DE-Freiburg)
-// and use exactly that creator/licence if it differs.
+// Licence according to the API field "license" (checked 2026-10-13):
+//   "CC BY 4.0 (creativecommons.org/licenses/by/4.0), attribution: energy-charts.info"
 // Content (copy into the Markdown tile, without the leading //):
 // ------------------------------------------------------------
 // **Data source**
