@@ -2,102 +2,102 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/dataAgent/definition/fewShots/1.0.0/schema.json",
   "fewShots": [
     {
-      "id": "5b987c64-b10b-4f79-9181-230cc39c3607",
+      "id": "0e9789be-f553-4ca9-91f6-5f9b824f0ed5",
       "question": "What is the renewable share right now?",
       "query": "TrafficLight()\n| where ts <= now()\n| top 1 by ts desc\n| project Time_local, RenewableShare_Pct, TrafficLightText"
     },
     {
-      "id": "21ab1d9c-7283-45b4-a092-c6f91db6bdab",
+      "id": "59017d13-0703-46ea-821d-89a99c8932ac",
       "question": "What is the current renewable share and traffic light?",
       "query": "TrafficLight()\n| where ts <= now()\n| top 1 by ts desc\n| project Time_local, TrafficLightText, RenewableShare_Pct"
     },
     {
-      "id": "8c0f57bd-314f-4fdd-9b3c-87cb35a30df5",
+      "id": "6097fb9d-7ed7-40ee-a10c-98a8120f93cf",
       "question": "What does the renewable share forecast look like for the next hours?",
       "query": "TrafficLight()\n| where ts > now() and ts <= now() + 12h\n| summarize RenewableShare_Pct = round(avg(RenewableShare_Pct), 1),\n            TrafficLightText = take_any(TrafficLightText)\n    by Hour_local = bin(Time_local, 1h)\n| order by Hour_local asc"
     },
     {
-      "id": "b9f076d3-c08f-40ee-8123-e20c94a55241",
+      "id": "a00011f6-e928-4f9f-a358-22acf44653d0",
       "question": "What is the current power mix?",
       "query": "let last_ts = toscalar(PowerMix() | where ts > ago(1d) | summarize max(ts));\nPowerMix()\n| where ts == last_ts\n| project Time_local, Source, GW\n| order by GW desc"
     },
     {
-      "id": "65257443-10a3-4423-969e-79852ed7cb8f",
+      "id": "84a9edbe-72e5-4fa8-87a1-2bf028dc1744",
       "question": "How much solar power was generated yesterday?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet from_utc = datetime_local_to_utc(today_local - 1d, \"Europe/Berlin\");\nlet to_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\nPowerMix()\n| where ts >= from_utc and ts < to_utc and Source == \"Solar\"\n| summarize Energy_GWh = round(sum(GW) * 0.25, 1), Peak_GW = max(GW)"
     },
     {
-      "id": "668ae2f2-cf36-4f75-93fd-40ad507d45dc",
+      "id": "5b09be73-a8ba-4f44-9afc-e2411aff3ed6",
       "question": "What was the share of each energy source in yesterday's generation?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet from_utc = datetime_local_to_utc(today_local - 1d, \"Europe/Berlin\");\nlet to_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\nPowerMix()\n| where ts >= from_utc and ts < to_utc\n| summarize Energy_GWh = sum(GW) * 0.25 by Source\n| extend Share_Pct = round(100.0 * Energy_GWh / toscalar(\n      PowerMix() | where ts >= from_utc and ts < to_utc | summarize sum(GW) * 0.25), 1),\n         Energy_GWh = round(Energy_GWh, 1)\n| order by Energy_GWh desc"
     },
     {
-      "id": "3e5c4f86-2206-4a75-8bab-d0b1bba2833d",
+      "id": "304f087a-3dc6-4a31-a95a-23dd2c8975ca",
       "question": "What was the renewable share per day over the last 7 days?",
       "query": "PowerMix()\n| where ts > ago(7d)\n| summarize Renewable_GWh = sumif(GW, IsRenewable) * 0.25, Total_GWh = sum(GW) * 0.25\n    by Date_local = startofday(Time_local)\n| project Date_local,\n          RenewableShareOfGeneration_Pct = round(100.0 * Renewable_GWh / Total_GWh, 1),\n          Total_GWh = round(Total_GWh, 1)\n| order by Date_local asc"
     },
     {
-      "id": "7269ee08-daac-43e3-bfbe-4becdbd0197c",
+      "id": "933abe5b-04af-418c-9961-136b7aaae315",
       "question": "What was the peak load yesterday and when?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet from_utc = datetime_local_to_utc(today_local - 1d, \"Europe/Berlin\");\nlet to_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\nLoadAndShare()\n| where ts >= from_utc and ts < to_utc\n| top 1 by Load_GW desc\n| project Time_local, Load_GW, ResidualLoad_GW, RenewableShare_Pct"
     },
     {
-      "id": "c97bc068-5cdf-4f8a-9fce-df8815a55f9c",
+      "id": "9accb807-c9af-42c0-9048-c135f2105819",
       "question": "What is the electricity price right now?",
       "query": "DayAheadPrice()\n| where ts <= now()\n| top 1 by ts desc\n| project Time_local, Price_ct_kWh, Price_EUR_MWh"
     },
     {
-      "id": "ac2c8595-f6ef-43ae-90c2-c14bc646b5a7",
+      "id": "a9f7d3e7-d6c5-4a0b-9d46-ee75bc20ee7d",
       "question": "When is electricity cheapest today?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet from_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\nlet to_utc = datetime_local_to_utc(today_local + 1d, \"Europe/Berlin\");\nDayAheadPrice()\n| where ts >= from_utc and ts < to_utc\n| top 3 by Price_ct_kWh asc\n| project Time_local, Price_ct_kWh"
     },
     {
-      "id": "5358c154-c79d-48e3-8625-2fc4164b47c2",
+      "id": "9336953d-3124-48ca-a559-8b8381ef6b20",
       "question": "Are there negative prices tomorrow?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet from_utc = datetime_local_to_utc(today_local + 1d, \"Europe/Berlin\");\nlet to_utc = datetime_local_to_utc(today_local + 2d, \"Europe/Berlin\");\nDayAheadPrice()\n| where ts >= from_utc and ts < to_utc\n| summarize QuarterHours = count(),\n            NegativeQuarterHours = countif(Price_ct_kWh < 0),\n            Min_ct_kWh = min(Price_ct_kWh),\n            FirstNegative_local = minif(Time_local, Price_ct_kWh < 0)"
     },
     {
-      "id": "3775485f-95a2-471a-b434-9550af8ef863",
+      "id": "c75a34fc-4f5a-4424-bcc5-985d03ce18c0",
       "question": "What was the average electricity price per day this week?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet monday_local = today_local - ((toint(dayofweek(today_local) / 1d) + 6) % 7) * 1d;\nlet from_utc = datetime_local_to_utc(monday_local, \"Europe/Berlin\");\nlet to_utc = datetime_local_to_utc(today_local + 1d, \"Europe/Berlin\");\nDayAheadPrice()\n| where ts >= from_utc and ts < to_utc\n| summarize Avg_ct_kWh = round(avg(Price_ct_kWh), 2),\n            Min_ct_kWh = min(Price_ct_kWh),\n            Max_ct_kWh = max(Price_ct_kWh)\n    by Date_local = startofday(Time_local)\n| order by Date_local asc"
     },
     {
-      "id": "8bb8c76f-838b-4129-8d59-904fd8e56856",
+      "id": "e0ae962b-4921-49e5-87a3-eb0cd7d0fa26",
       "question": "How does the electricity price depend on the renewable share in the last 30 days?",
       "query": "PriceVsRenewableShare(30d)"
     },
     {
-      "id": "5df5bb37-7ac8-48da-b423-ba90e2430d41",
+      "id": "2a3cde2f-4863-4276-a399-a30b82db80c4",
       "question": "What is the correlation between the renewable share and the electricity price?",
       "query": "PriceVsRenewableShare(30d)\n| where RenewableBand startswith \"6\"\n| project Correlation, Avg_ct_kWh, QuarterHours, From_local, To_local"
     },
     {
-      "id": "189a5333-f35b-40fb-a02b-777fcd830860",
+      "id": "dc72da35-ca0f-43ac-83c0-50ad5682a858",
       "question": "Is Germany currently importing or exporting electricity?",
       "query": "let last_cbpf = toscalar(NetImport() | where ts > ago(2d) | summarize max(ts));\nNetImport()\n| where ts > ago(2d) and ts <= last_cbpf - 30m and CountriesReported >= 10\n| top 1 by ts desc\n| project Time_local, NetImport_GW, CountriesReported"
     },
     {
-      "id": "12abc108-3b05-4e39-922c-ec1e5dc9297c",
+      "id": "dbdcb1ff-033a-436f-a173-90d3f9e6282f",
       "question": "From which countries did Germany import the most electricity yesterday?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet from_utc = datetime_local_to_utc(today_local - 1d, \"Europe/Berlin\");\nlet to_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\nCrossBorderFlows()\n| where ts >= from_utc and ts < to_utc and CountriesReported >= 10\n| summarize NetFlow_GWh = round(sum(Flow_MW) / 1000 * 0.25, 2) by Country\n| order by NetFlow_GWh desc"
     },
     {
-      "id": "e15e69b0-69cc-4d12-ac98-ea7a17bdeacc",
+      "id": "9d64a772-ff6a-45d8-b0b1-db419cc27993",
       "question": "What was the largest grid frequency deviation today and when?",
       "query": "let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\nlet from_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\nGridFrequencyPerMinute()\n| where ts >= from_utc\n| top 1 by MaxDeviation_mHz desc\n| project Time_local, MaxDeviation_mHz, Min_Hz, Max_Hz"
     },
     {
-      "id": "c3beb2cd-63d2-45f9-8058-d07b1c18960b",
+      "id": "f09d91e6-6263-476e-a001-520510c53452",
       "question": "How many minutes had a frequency deviation above 100 mHz in the last 30 days?",
       "query": "GridFrequencyPerMinute()\n| where ts > ago(30d)\n| summarize MinutesAbove100mHz = countif(MaxDeviation_mHz > 100),\n            MinutesAbove50mHz = countif(MaxDeviation_mHz > 50),\n            MaxDeviation_mHz = max(MaxDeviation_mHz)"
     },
     {
-      "id": "f68edf76-3fb1-4935-b300-b3a7bd1aae64",
+      "id": "8628681a-f0b8-407a-912c-cf4be7758cf8",
       "question": "What is the grid frequency right now?",
       "query": "GridFrequency()\n| where ts > ago(15m)\n| top 1 by ts desc\n| project Time_local = datetime_utc_to_local(ts, \"Europe/Berlin\"), hz, deviation_mhz"
     },
     {
-      "id": "d9ba93e8-1040-41f7-988c-380e4d5b0b6c",
+      "id": "9de44569-de2e-48cf-9642-4b8a314c5ac8",
       "question": "How often was the traffic light green in the last 7 days?",
       "query": "TrafficLight()\n| where ts > ago(7d) and ts <= now()\n| summarize Hours = round(count() * 0.25, 1) by TrafficLightText\n| order by Hours desc"
     }

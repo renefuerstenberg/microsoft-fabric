@@ -2,14 +2,14 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/dataAgent/definition/dataSource/1.0.0/schema.json",
   "artifactId": "c0d8e98c-9d8e-b363-45e2-9b9b24018399",
   "workspaceId": "00000000-0000-0000-0000-000000000000",
-  "dataSourceInstructions": "IMPORTANT:\n- Always query through the functions listed below. Never query energy_latest, energy_raw, frequency_1s or frequency_1min directly.\n- \"Now\", \"current\", \"right now\" means the most recent timestamp that is not in the future: always filter ts <= now() before taking the latest value. TrafficLight() and DayAheadPrice() contain future values (forecasts, tomorrow's prices).\n- Day-ahead prices for today (and tomorrow, once published) are already fixed. For daily price statistics include the whole day, do not cut at now().\n- ts is UTC. Always show Time_local to the user, never ts.\n- For the current renewable share use TrafficLight() (it has a value for the current quarter-hour). Use LoadAndShare() for past periods and measured actuals.\n- Weeks start on Monday (German convention). Do not use startofweek() with a second parameter – it is an offset in weeks, not the first day of the week. Compute Monday like this:\n  let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\n  let monday_local = today_local - ((toint(dayofweek(today_local) / 1d) + 6) % 7) * 1d;\n- Always aggregate in KQL. For analysis questions never return raw 15-minute rows – the tool returns at most 200 rows and the answer would be based on incomplete data. Return at most 25 aggregated rows.\n- Each query must return exactly one result table. Do not combine several result statements (e.g. a time series followed by statistics) – only the first result is returned.\n- Compute correlations in KQL with sums (see example query), never with series_stats_dynamic on aggregated values.\n- If a query returns no data, check the time filter first and retry before telling the user that data is missing. Never refer the user to external websites for data that is in this database.\n\nUse the following KQL functions instead of the raw tables whenever possible. They return\nclean, typed columns:\n\n| Function | Content | Key columns |\n|---|---|---|\n| PowerMix() | Generation per energy source group, 15 min | ts, Time_local, Source, IsRenewable, GW |\n| LoadAndShare() | Load, residual load, renewable share, 15 min | ts, Time_local, Load_GW, ResidualLoad_GW, RenewableShare_Pct |\n| TrafficLight() | Traffic light and renewable share incl. forecast, 15 min | ts, Time_local, TrafficLight, TrafficLightText, RenewableShare_Pct, IsFuture |\n| DayAheadPrice() | Day-ahead price DE-LU, 15 min | ts, Time_local, Price_EUR_MWh, Price_ct_kWh |\n| CrossBorderFlows() | Flow per neighbouring country, 15 min | ts, Time_local, Country, Flow_MW, CountriesReported |\n| NetImport() | Net exchange with all neighbours, 15 min | ts, Time_local, NetImport_GW, CountriesReported |\n| PriceVsRenewableShare(lookback) | Price per renewable-share band + one row \"6: Total (all quarter-hours)\" with overall average price, number of quarter-hours and correlation – use for any \"price vs. renewable share\" question. Use the Total row for overall figures; never sum or average the band rows yourself | RenewableBand, Avg_ct_kWh, Avg_EUR_MWh, QuarterHours, Correlation (Total row only), From_local, To_local |\n| GridFrequency() | Grid frequency per second | ts, hz, deviation_mhz |\n| GridFrequencyPerMinute() | Grid frequency per minute | ts, Time_local, Min_Hz, Avg_Hz, Max_Hz, MaxDeviation_mHz, Samples |\n\nRules:\n- ts is UTC, Time_local is German local time. Filter on ts for speed. Convert local day\n  boundaries with datetime_local_to_utc(..., \"Europe/Berlin\"), e.g.\n  let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\n  let from_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\n- Always filter on a time range. For \"now\" use the latest ts that has data, not now().\n- Never name a variable \"latest\" (reserved word). Use names such as last_ts.\n- Source values in PowerMix(): Lignite, Hard coal, Natural gas, Other fossil, Other, Biomass,\n  Hydro, Pumped storage, Wind offshore, Wind onshore, Solar.\n- Country values: Austria, Belgium, Czech Republic, Denmark, France, Luxembourg, Netherlands,\n  Norway, Poland, Sweden, Switzerland.\n- Cross-border data: the most recent quarter-hours are incomplete. Only use timestamps with\n  CountriesReported >= 10 and at least 30 minutes older than the newest cbpf timestamp.\n- TrafficLight(): rows with IsFuture == true are forecasts. For past or current values filter\n  ts <= now().\n- Grid frequency: use GridFrequency() only for periods up to a few hours (86,400 rows per day);\n  use GridFrequencyPerMinute() for longer periods. Nominal value is 50 Hz; deviations up to\n  ±50 mHz are normal, beyond ±100 mHz are rare. A short gap every day shortly before midnight\n  UTC is a known gap in the source data.\n- Summarize before returning: answers are limited to 25 rows.",
+  "dataSourceInstructions": "IMPORTANT:\n- Always query through the functions listed below. Never query energy_latest, energy_raw, frequency_1s or frequency_1min directly.\n- \"Now\", \"current\", \"right now\" means the most recent timestamp that is not in the future: always filter ts <= now() before taking the latest value. TrafficLight() and DayAheadPrice() contain future values (forecasts, tomorrow's prices).\n- Day-ahead prices for today (and tomorrow, once published) are already fixed. For daily price statistics include the whole day, do not cut at now().\n- ts is UTC. Always show Time_local to the user, never ts.\n- For the current renewable share use TrafficLight() (it has a value for the current quarter-hour). Use LoadAndShare() for past periods and measured actuals.\n- Weeks start on Monday (German convention). Do not use startofweek() with a second parameter – it is an offset in weeks, not the first day of the week. Compute Monday like this:\n  let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\n  let monday_local = today_local - ((toint(dayofweek(today_local) / 1d) + 6) % 7) * 1d;\n- Always aggregate in KQL. For analysis questions never return raw 15-minute rows – the tool returns at most 200 rows and the answer would be based on incomplete data. Return at most 25 aggregated rows.\n- Each query must return exactly one result table. Do not combine several result statements (e.g. a time series followed by statistics) – only the first result is returned.\n- Compute correlations in KQL with sums (see example query), never with series_stats_dynamic on aggregated values.\n- If a query returns no data, check the time filter first and retry before telling the user that data is missing. Never refer the user to external websites for data that is in this database.\n\nUse the following KQL functions instead of the raw tables whenever possible. They return\nclean, typed columns:\n\n| Function | Content | Key columns |\n|---|---|---|\n| PowerMix() | Generation per energy source group, 15 min | ts, Time_local, Source, IsRenewable, GW |\n| LoadAndShare() | Load, residual load, renewable share, 15 min | ts, Time_local, Load_GW, ResidualLoad_GW, RenewableShare_Pct |\n| TrafficLight() | Traffic light and renewable share incl. forecast, 15 min | ts, Time_local, TrafficLight, TrafficLightText, RenewableShare_Pct, IsFuture |\n| DayAheadPrice() | Day-ahead price DE-LU, 15 min | ts, Time_local, Price_EUR_MWh, Price_ct_kWh |\n| CrossBorderFlows() | Flow per neighboring country, 15 min | ts, Time_local, Country, Flow_MW, CountriesReported |\n| NetImport() | Net exchange with all neighbors, 15 min | ts, Time_local, NetImport_GW, CountriesReported |\n| PriceVsRenewableShare(lookback) | Price per renewable-share band + one row \"6: Total (all quarter-hours)\" with overall average price, number of quarter-hours and correlation – use for any \"price vs. renewable share\" question. Use the Total row for overall figures; never sum or average the band rows yourself | RenewableBand, Avg_ct_kWh, Avg_EUR_MWh, QuarterHours, Correlation (Total row only), From_local, To_local |\n| GridFrequency() | Grid frequency per second | ts, hz, deviation_mhz |\n| GridFrequencyPerMinute() | Grid frequency per minute | ts, Time_local, Min_Hz, Avg_Hz, Max_Hz, MaxDeviation_mHz, Samples |\n\nRules:\n- ts is UTC, Time_local is German local time. Filter on ts for speed. Convert local day\n  boundaries with datetime_local_to_utc(..., \"Europe/Berlin\"), e.g.\n  let today_local = startofday(datetime_utc_to_local(now(), \"Europe/Berlin\"));\n  let from_utc = datetime_local_to_utc(today_local, \"Europe/Berlin\");\n- Always filter on a time range. For \"now\" use the latest ts that has data, not now().\n- Never name a variable \"latest\" (reserved word). Use names such as last_ts.\n- Source values in PowerMix(): Lignite, Hard coal, Natural gas, Other fossil, Other, Biomass,\n  Hydro, Pumped storage, Wind offshore, Wind onshore, Solar.\n- Country values: Austria, Belgium, Czech Republic, Denmark, France, Luxembourg, Netherlands,\n  Norway, Poland, Sweden, Switzerland.\n- Cross-border data: the most recent quarter-hours are incomplete. Only use timestamps with\n  CountriesReported >= 10 and at least 30 minutes older than the newest cbpf timestamp.\n- TrafficLight(): rows with IsFuture == true are forecasts. For past or current values filter\n  ts <= now().\n- Grid frequency: use GridFrequency() only for periods up to a few hours (86,400 rows per day);\n  use GridFrequencyPerMinute() for longer periods. Nominal value is 50 Hz; deviations up to\n  ±50 mHz are normal, beyond ±100 mHz are rare. A short gap every day shortly before midnight\n  UTC is a known gap in the source data.\n- Summarize before returning: answers are limited to 25 rows.\n",
   "displayName": "eh_1",
   "type": "kusto",
-  "userDescription": "Real-time data on the German power grid (source: Energy-Charts.info / Fraunhofer ISE, prices: Bundesnetzagentur | SMARD.de), collected since October 2026 and kept permanently:\n- public net power generation per energy source, load, residual load and renewable share (15 min)\n- Energy-Charts traffic light (green/yellow/red/grid congestion) incl. forecast\n- day-ahead electricity prices DE-LU (15 min), incl. tomorrow from about 13:00\n- physical cross-border flows with the 11 neighbouring countries (15 min)\n- grid frequency of the Continental European grid (per second and per minute)\nUse it for questions about electricity generation, renewables, prices, imports/exports and grid frequency in Germany.",
+  "userDescription": "Real-time data on the German power grid (source: Energy-Charts.info / Fraunhofer ISE, prices: Bundesnetzagentur | SMARD.de), collected since October 2026 and kept permanently:\n- public net power generation per energy source, load, residual load and renewable share (15 min)\n- Energy-Charts traffic light (green/yellow/red/grid congestion) incl. forecast\n- day-ahead electricity prices DE-LU (15 min), incl. tomorrow from about 13:00\n- physical cross-border flows with the 11 neighboring countries (15 min)\n- grid frequency of the Continental European grid (per second and per minute)\nUse it for questions about electricity generation, renewables, prices, imports/exports and grid frequency in Germany.\n",
   "metadata": null,
   "elements": [
     {
-      "id": "90998bbb-acf0-42af-b00d-d8e92f8c29aa",
+      "id": "63fc244e-6058-4bf7-a4c0-89a89e6b5243",
       "is_selected": false,
       "display_name": "Tables",
       "type": "table_grouping",
@@ -144,14 +144,14 @@
       ]
     },
     {
-      "id": "dd2b482a-e86b-4bdb-ab19-80c11dd66bf4",
+      "id": "ae519192-9cfd-4c1c-bc60-89dd0f7657c0",
       "is_selected": true,
       "display_name": "Functions",
       "type": "function_grouping",
       "description": null,
       "children": [
         {
-          "id": "9b8932d1-14ee-4be3-9075-d583a9943d24",
+          "id": "65974ccd-a0b1-4168-a23b-b0a33847d46c",
           "is_selected": true,
           "display_name": "GridFrequency",
           "type": "kusto.function",
@@ -159,7 +159,7 @@
           "children": []
         },
         {
-          "id": "c26db4a8-c350-4523-bbf4-3cfbca901383",
+          "id": "4182c892-4bd6-49cc-9921-27c7e24c6f28",
           "is_selected": true,
           "display_name": "PowerMix",
           "type": "kusto.function",
@@ -167,7 +167,7 @@
           "children": []
         },
         {
-          "id": "ed17d238-f916-4f43-9f59-5f226bdb873f",
+          "id": "fedebdd4-0f5a-43be-8800-72f0c401bad4",
           "is_selected": true,
           "display_name": "LoadAndShare",
           "type": "kusto.function",
@@ -175,7 +175,7 @@
           "children": []
         },
         {
-          "id": "20803401-1279-49fe-a1cd-85d210cdf046",
+          "id": "3fd366cc-6967-4b13-a753-2795691c7edc",
           "is_selected": true,
           "display_name": "TrafficLight",
           "type": "kusto.function",
@@ -183,7 +183,7 @@
           "children": []
         },
         {
-          "id": "021c7059-fa41-4883-a1b6-336a9c6fca98",
+          "id": "06454712-8e21-41e4-9fbb-a82ff8ffe944",
           "is_selected": true,
           "display_name": "DayAheadPrice",
           "type": "kusto.function",
@@ -191,7 +191,7 @@
           "children": []
         },
         {
-          "id": "5da78671-d791-4440-8e39-d0eb2e40f4f1",
+          "id": "2094716e-c6da-42ec-b74a-b256b097f906",
           "is_selected": true,
           "display_name": "CrossBorderFlows",
           "type": "kusto.function",
@@ -199,7 +199,7 @@
           "children": []
         },
         {
-          "id": "51e492d1-2688-457d-a7ed-57b23f84b022",
+          "id": "d0335db6-a3e0-4317-a524-98cb59647ac1",
           "is_selected": true,
           "display_name": "NetImport",
           "type": "kusto.function",
@@ -207,7 +207,7 @@
           "children": []
         },
         {
-          "id": "df8c1b02-0105-4089-b113-8d6c39c290df",
+          "id": "23699fe1-18cd-424e-b55d-0d3fbf884999",
           "is_selected": true,
           "display_name": "GridFrequencyPerMinute",
           "type": "kusto.function",
@@ -215,7 +215,7 @@
           "children": []
         },
         {
-          "id": "dacc53b4-351b-4570-a102-011137641cac",
+          "id": "703a8d9b-65b4-4c5b-a583-28e7d6c5dce5",
           "is_selected": true,
           "display_name": "PriceVsRenewableShare",
           "type": "kusto.function",
@@ -225,7 +225,7 @@
       ]
     },
     {
-      "id": "b23c4c03-9b14-42cf-b65e-6c9416d6d048",
+      "id": "0e5a7491-a1d5-4e09-9192-533807b25d5d",
       "is_selected": false,
       "display_name": "Shortcuts",
       "type": "shortcut_grouping",
@@ -233,14 +233,14 @@
       "children": []
     },
     {
-      "id": "f12a5455-008a-4caf-960b-1eea8317aa56",
+      "id": "5728d872-f707-4f81-aaae-3e8cb79d177b",
       "is_selected": false,
       "display_name": "Materialized Views",
       "type": "materialized_view_grouping",
       "description": null,
       "children": [
         {
-          "id": "77f421f0-9832-49e5-922e-9673ced4fe4f",
+          "id": "d3c6019c-e3af-4a31-b1ce-4e905265b5cb",
           "is_selected": false,
           "display_name": "energy_latest",
           "type": "kusto.materialized_view",
@@ -330,7 +330,7 @@
           ]
         },
         {
-          "id": "8c01e85a-159a-48bf-b8fd-139e856641b7",
+          "id": "f9dd0b34-2fa7-410f-94c7-70037ad1817b",
           "is_selected": false,
           "display_name": "frequency_1s",
           "type": "kusto.materialized_view",
@@ -357,7 +357,7 @@
           ]
         },
         {
-          "id": "39690b05-b501-40d8-8e12-8cce899faf7b",
+          "id": "6403a29e-f60d-41a5-b5fa-31ede74e3d42",
           "is_selected": false,
           "display_name": "frequency_1min",
           "type": "kusto.materialized_view",
