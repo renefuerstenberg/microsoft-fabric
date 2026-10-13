@@ -69,7 +69,7 @@
         "kind": "query",
         "queryId": "daeee44a-112f-4ea4-9730-e88945834777"
       },
-      "description": "Power exchange with all neighbouring countries combined.\nPositive = Germany imports power, negative = Germany exports power.\nShows the latest completely reported value.\nFor reference: 1 GW is roughly the output of one large power plant unit.",
+      "description": "Power exchange with all neighboring countries combined.\nPositive = Germany imports power, negative = Germany exports power.\nShows the latest completely reported value.\nFor reference: 1 GW is roughly the output of one large power plant unit.",
       "visualOptions": {
         "multiStat__textSize": "auto",
         "multiStat__valueColumn": null,
@@ -230,7 +230,7 @@
         "kind": "query",
         "queryId": "6fd23d65-732e-4320-9217-a004a1e323d7"
       },
-      "description": "Power flows between Germany and each neighbouring country. Bars to the right = power flows into Germany (import), bars to the left = power flows into the neighbouring country (export). Shows the latest completely reported point in time.",
+      "description": "Power flows between Germany and each neighboring country. Bars to the right = power flows into Germany (import), bars to the left = power flows into the neighboring country (export). Shows the latest completely reported point in time.",
       "visualOptions": {
         "multipleYAxes": {
           "base": {
