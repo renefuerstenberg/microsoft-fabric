@@ -18,7 +18,7 @@ API → Azure Functions → Eventstream → Eventhouse → Dashboard · Activato
 | Retention | Permanent (36,500 days), recoverability enabled |
 | Fabric workspace | RTI Energy Germany |
 | Fabric capacity | Paid **F capacity** (F2 or higher) – **required for the data agent** |
-| Licence of the data | CC BY 4.0 (see [Licences and attribution](#licences-and-attribution)) |
+| License of the data | CC BY 4.0 (see [Licenses and attribution](#licenses-and-attribution)) |
 
 ---
 
@@ -40,7 +40,7 @@ API → Azure Functions → Eventstream → Eventhouse → Dashboard · Activato
 14. [Git integration of the Fabric items](#git-integration-of-the-fabric-items)
 15. [Data quality and known characteristics](#data-quality-and-known-characteristics)
 16. [Monitoring and troubleshooting](#monitoring-and-troubleshooting)
-17. [Licences and attribution](#licences-and-attribution)
+17. [Licenses and attribution](#licenses-and-attribution)
 
 ---
 
@@ -50,7 +50,7 @@ API → Azure Functions → Eventstream → Eventhouse → Dashboard · Activato
   grouped into 10 categories.
 - **Traffic light**: Energy-Charts signal (green / yellow / red / grid congestion) and the
   renewable share of the load, including a forecast for the coming hours.
-- **Cross-border flows**: physical power exchange with all 11 neighbouring countries and the
+- **Cross-border flows**: physical power exchange with all 11 neighboring countries and the
   net import/export, with a completeness rule for late-reporting countries.
 - **Electricity prices**: day-ahead exchange price for the bidding zone DE-LU per
   quarter-hour, for today and – once the auction is published – tomorrow.
@@ -62,7 +62,7 @@ API → Azure Functions → Eventstream → Eventhouse → Dashboard · Activato
   (now / tomorrow), frequency deviations and pipeline outages.
 - **Data agent**: ask questions in natural language (English), e.g. *"When is electricity
   cheapest today?"* or *"How does the price depend on the renewable share?"* – optionally also
-  available in Microsoft 365 Copilot (additional licence, see [Data agent](#data-agent)).
+  available in Microsoft 365 Copilot (additional license, see [Data agent](#data-agent)).
 - **Everything in Git**: function code, KQL scripts and all Fabric items (through Fabric Git
   integration) in one repository.
 
@@ -204,7 +204,7 @@ Base URL: `https://api.energy-charts.info` (API version 2). No key is required.
 |---|---|---|---|
 | `/v2/public_power` | Public net generation per source, load, residual load, renewable share | 15 min, MW | ISO `start`/`end` (UTC) |
 | `/v2/signal` | Traffic light (−1…2) and renewable share incl. forecast | 15 min | none (returns today + forecast) |
-| `/v2/cbpf` | Cross-border physical flows per neighbour country + sum | 15 min, GW | day format `YYYY-MM-DD` (local time) |
+| `/v2/cbpf` | Cross-border physical flows per neighbor country + sum | 15 min, GW | day format `YYYY-MM-DD` (local time) |
 | `/v2/price` | Day-ahead price, bidding zone `bzn=DE-LU` | 15 min, EUR/MWh | day format, today … tomorrow |
 | `/v2/frequency` | Grid frequency, region `DE-Freiburg` (currently the only one) | 1 s, Hz | ISO `start`/`end` (UTC), max. 3 days |
 
@@ -405,12 +405,12 @@ Queries: `Fabric/kql/02`–`04`. The complete definition is in `Power Mix German
 |---|---|---|
 | Traffic Light Now | Stat | Current traffic light of the Energy-Charts signal |
 | Renewable Share Now (%) | Stat | Renewable share of the current load |
-| Net Import/Export Now (GW) | Stat | Net exchange with all neighbours, latest complete quarter-hour |
+| Net Import/Export Now (GW) | Stat | Net exchange with all neighbors, latest complete quarter-hour |
 | Data Status by Source | Table | Data available until, delay in minutes, API timestamp |
 | Power Mix | Stacked area | Generation by source (10 groups) |
 | Renewable Share – Actual + Forecast | Line | Actual share and signal incl. forecast |
 | Load and Residual Load | Line | Consumption and the part not covered by wind and solar |
-| Cross-Border Flows by Country (MW) | Bar | Import/export per neighbouring country in MW (small flows stay visible) |
+| Cross-Border Flows by Country (MW) | Bar | Import/export per neighboring country in MW (small flows stay visible) |
 | Net Import over Time | Line | Net exchange over the selected time range |
 | Data sources | Markdown | Attribution |
 
@@ -420,7 +420,7 @@ Queries: `Fabric/kql/02`–`04`. The complete definition is in `Power Mix German
 |---|---|---|
 | Electricity Price Now (ct/kWh) | Stat | Day-ahead price of the current quarter-hour |
 | Price Overview Today and Tomorrow | Table | Average, min (with time), max, number of negative quarter-hours |
-| Electricity Price Today and Tomorrow | Column | Price per quarter-hour, today and tomorrow in two colours |
+| Electricity Price Today and Tomorrow | Column | Price per quarter-hour, today and tomorrow in two colors |
 | Electricity Price vs. Renewable Share | Line, 2 Y axes | Price (orange, left) vs. renewable share (blue, right) |
 | Data sources | Markdown | Attribution |
 
@@ -510,8 +510,8 @@ the column names.
 | `LoadAndShare()` | Load, residual load (GW), renewable share (%) |
 | `TrafficLight()` | Traffic light and renewable share incl. forecast (`IsFuture`) |
 | `DayAheadPrice()` | Day-ahead price in EUR/MWh and ct/kWh |
-| `CrossBorderFlows()` | Flow per neighbouring country (MW) with `CountriesReported` |
-| `NetImport()` | Net exchange with all neighbours (GW) with `CountriesReported` |
+| `CrossBorderFlows()` | Flow per neighboring country (MW) with `CountriesReported` |
+| `NetImport()` | Net exchange with all neighbors (GW) with `CountriesReported` |
 | `GridFrequencyPerMinute()` | Min / avg / max frequency and max. deviation per minute |
 | `PriceVsRenewableShare(lookback)` | **Fixed analysis**: price per renewable-share band plus one *Total* row with overall average, number of quarter-hours and correlation |
 
@@ -544,8 +544,8 @@ that every answer – in the agent and in the dashboard – is computed the same
 When publishing the data agent, it can also be made available in **Microsoft 365 Copilot**.
 Users can then ask questions about the power grid directly in the Copilot chat.
 
-- **Licensing:** this requires additional licences on top of the Fabric capacity – typically a
-  **Microsoft 365 Copilot licence**. Users also need at least read access to the data agent and
+- **Licensing:** this requires additional licenses on top of the Fabric capacity – typically a
+  **Microsoft 365 Copilot license**. Users also need at least read access to the data agent and
   its data source. Check the current requirements in the
   [Microsoft documentation](https://learn.microsoft.com/en-us/fabric/data-science/data-agent-microsoft-copilot-studio)
   before rolling it out.
@@ -646,7 +646,7 @@ the item. To undo, revert the commit and update again.
 
 ## Data quality and known characteristics
 
-| Topic | Behaviour | Handling |
+| Topic | Behavior | Handling |
 |---|---|---|
 | Late corrections (public_power, cbpf) | Values change for many hours after first publication (measured: beyond 6 h) | EnergyBackfill every 3 h for the last 3 days; `energy_latest` keeps the newest version |
 | Incomplete cross-border data | The newest quarter-hours contain 0 for countries that have not reported yet; Sweden often reports hours late | Tiles and alerts use the latest timestamp at least 30 min old with all 11 countries reported; fallback to ≥ 10 of 11 if none within 6 h (e.g. cable maintenance = genuine 0) |
@@ -697,20 +697,20 @@ nightly gap before midnight UTC is expected.
 | Cross-border tiles show only a few countries | Recent quarter-hours incomplete | Expected; the completeness rule shows the latest complete timestamp |
 | Frequency gap other than at midnight UTC | Function restart or outage longer than 30 min | Wait for the next EnergyBackfill (every 3 h) or start it manually; compare with the source URL |
 | Tile shows "function not found" | Query still uses an old function name | Update the query to `GridFrequency()` |
-| `Syntax error: The incomplete fragment is unexpected`, no syntax colouring, `let` underlined | A reserved word is used as a variable name (e.g. `let latest = …`) | Rename the variable (e.g. `last_ts`) |
+| `Syntax error: The incomplete fragment is unexpected`, no syntax coloring, `let` underlined | A reserved word is used as a variable name (e.g. `let latest = …`) | Rename the variable (e.g. `last_ts`) |
 | Data agent in Copilot says "no data", in Fabric it works | Copilot uses an older published version | Publish the agent again (with the Copilot option), start a new Copilot chat |
 | Data agent gives different results for the same question | The agent designs open analyses itself | Add an example query or encapsulate the analysis in a function (see [Data agent](#data-agent)) |
 
 ---
 
-## Licences and attribution
+## Licenses and attribution
 
-| Data | Source | Licence |
+| Data | Source | License |
 |---|---|---|
 | Generation, signal, cross-border flows, grid frequency | [Energy-Charts.info](https://energy-charts.info), Fraunhofer ISE | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | Day-ahead prices DE-LU | [Bundesnetzagentur \| SMARD.de](https://www.smard.de) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 
-CC BY 4.0 requires four things: the **creator**, a **link to the licence**, a **link to the
+CC BY 4.0 requires four things: the **creator**, a **link to the license**, a **link to the
 source** and a note **whether the data was changed**. This project changes the data
 (aggregation, grouping into source groups, unit conversion such as EUR/MWh → ct/kWh, minute
 values from second values), so every attribution includes a short *Changes* note.
@@ -724,6 +724,6 @@ Where the attribution appears:
 | Data agent (and Microsoft 365 Copilot, if published) | Every answer ends with a source line (rule in `agent_instructions.md`) |
 | Slides, screenshots, posts | One line below the image, e.g. *"Data: Energy-Charts.info (Fraunhofer ISE), Bundesnetzagentur \| SMARD.de · CC BY 4.0 · aggregated"* |
 
-Keep the attribution when publishing screenshots or derived data. The API returns the licence
+Keep the attribution when publishing screenshots or derived data. The API returns the license
 of each endpoint in the field `license` (EnergyPriceIngest writes it to the Azure Function
 log) – if it ever changes, update the tiles accordingly.

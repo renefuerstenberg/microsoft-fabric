@@ -54,7 +54,7 @@ energy_latest
 
 // ------------------------------------------------------------
 // Tile 3: Net Import Now                     Visual: Stat (GW)
-// Description: Physical net power exchange with all neighbouring
+// Description: Physical net power exchange with all neighboring
 //   countries for the latest completely reported quarter-hour.
 //   Positive = Germany imports, negative = Germany exports.
 // ------------------------------------------------------------
@@ -148,7 +148,7 @@ union
 // ------------------------------------------------------------
 // Tile 7: Cross-Border Flows by Country (MW)   Visual: Bar chart
 //   X: Country, Y: MW (MW instead of GW so that small flows stay visible)
-// Description: Physical power flows with each neighbouring country for
+// Description: Physical power flows with each neighboring country for
 //   the latest completely reported quarter-hour. Positive = import into
 //   Germany, negative = export.
 // Uses the same completeness rule as tile 3.
@@ -177,7 +177,7 @@ energy_latest
 // ------------------------------------------------------------
 // Tile 8: Net Import over Time               Visual: Line or column chart
 //   X: Time, Y: Net import GW
-// Description: Net power exchange with all neighbouring countries over
+// Description: Net power exchange with all neighboring countries over
 //   time. Positive = import, negative = export. The most recent
 //   quarter-hours are only shown once all countries have reported.
 // Uses the same completeness rule as tile 3.
@@ -213,8 +213,8 @@ energy_latest
 
 // ------------------------------------------------------------
 // Tile 10: Data Sources                      Visual: Markdown tile
-// Required attribution according to the CC BY 4.0 licence.
-// CC BY 4.0 requires: creator, licence link, source link, and a note
+// Required attribution according to the CC BY 4.0 license.
+// CC BY 4.0 requires: creator, license link, source link, and a note
 // whether the data was changed. Same text on pages Grid Live and
 // Electricity Prices.
 // Content (copy into the Markdown tile, without the leading //):

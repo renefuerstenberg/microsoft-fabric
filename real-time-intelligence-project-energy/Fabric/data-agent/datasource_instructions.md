@@ -21,8 +21,8 @@ clean, typed columns:
 | LoadAndShare() | Load, residual load, renewable share, 15 min | ts, Time_local, Load_GW, ResidualLoad_GW, RenewableShare_Pct |
 | TrafficLight() | Traffic light and renewable share incl. forecast, 15 min | ts, Time_local, TrafficLight, TrafficLightText, RenewableShare_Pct, IsFuture |
 | DayAheadPrice() | Day-ahead price DE-LU, 15 min | ts, Time_local, Price_EUR_MWh, Price_ct_kWh |
-| CrossBorderFlows() | Flow per neighbouring country, 15 min | ts, Time_local, Country, Flow_MW, CountriesReported |
-| NetImport() | Net exchange with all neighbours, 15 min | ts, Time_local, NetImport_GW, CountriesReported |
+| CrossBorderFlows() | Flow per neighboring country, 15 min | ts, Time_local, Country, Flow_MW, CountriesReported |
+| NetImport() | Net exchange with all neighbors, 15 min | ts, Time_local, NetImport_GW, CountriesReported |
 | PriceVsRenewableShare(lookback) | Price per renewable-share band + one row "6: Total (all quarter-hours)" with overall average price, number of quarter-hours and correlation – use for any "price vs. renewable share" question. Use the Total row for overall figures; never sum or average the band rows yourself | RenewableBand, Avg_ct_kWh, Avg_EUR_MWh, QuarterHours, Correlation (Total row only), From_local, To_local |
 | GridFrequency() | Grid frequency per second | ts, hz, deviation_mhz |
 | GridFrequencyPerMinute() | Grid frequency per minute | ts, Time_local, Min_Hz, Avg_Hz, Max_Hz, MaxDeviation_mHz, Samples |

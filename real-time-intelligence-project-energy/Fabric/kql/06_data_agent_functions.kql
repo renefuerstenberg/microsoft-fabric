@@ -98,9 +98,9 @@ DayAheadPrice() {
 
 
 // ------------------------------------------------------------
-// A5) CrossBorderFlows(): physical flows per neighbouring country
+// A5) CrossBorderFlows(): physical flows per neighboring country
 // ------------------------------------------------------------
-.create-or-alter function with (folder = "Agent", docstring = "Physical cross-border power flows between Germany and each neighbouring country, 15-minute values in MW. Positive = import into Germany. CountriesReported = how many of 11 countries had reported for that timestamp.")
+.create-or-alter function with (folder = "Agent", docstring = "Physical cross-border power flows between Germany and each neighboring country, 15-minute values in MW. Positive = import into Germany. CountriesReported = how many of 11 countries had reported for that timestamp.")
 CrossBorderFlows() {
     let Countries = datatable(series_id: string, Country: string)
     [
@@ -125,9 +125,9 @@ CrossBorderFlows() {
 
 
 // ------------------------------------------------------------
-// A6) NetImport(): net exchange with all neighbours
+// A6) NetImport(): net exchange with all neighbors
 // ------------------------------------------------------------
-.create-or-alter function with (folder = "Agent", docstring = "Net physical power exchange of Germany with all neighbouring countries, 15-minute values in GW. Positive = net import, negative = net export. CountriesReported = how many of 11 countries had reported.")
+.create-or-alter function with (folder = "Agent", docstring = "Net physical power exchange of Germany with all neighboring countries, 15-minute values in GW. Positive = net import, negative = net export. CountriesReported = how many of 11 countries had reported.")
 NetImport() {
     let reported = energy_latest
         | where endpoint == "cbpf" and series_id != "sum"

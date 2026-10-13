@@ -17,19 +17,19 @@ Functions in this app (all timer triggers, schedules in UTC):
 API endpoints used:
   - /v2/public_power  Net public power generation per source (MW, 15-min grid)
   - /v2/signal        Renewable share of load + traffic light incl. forecast
-  - /v2/cbpf          Cross-border physical flows per neighbour country (GW)
+  - /v2/cbpf          Cross-border physical flows per neighbor country (GW)
   - /v2/price         Day-ahead price per bidding zone (EUR/MWh)
   - /v2/frequency     Grid frequency, measured in Freiburg (Hz, 1 s)
 
 Rate limit according to the API: 2 requests/min per endpoint (signal 20/min).
-HTTP 429 responses carry a Retry-After header, which is honoured.
+HTTP 429 responses carry a Retry-After header, which is honored.
 
 Every single value becomes one event (long format). Deduplication of later
 API corrections happens in the Eventhouse (materialized views energy_latest
 and frequency_1s).
 
-Data source: Energy-Charts.info, licence CC BY 4.0.
-Prices DE-LU: Bundesnetzagentur | SMARD.de, licence CC BY 4.0.
+Data source: Energy-Charts.info, license CC BY 4.0.
+Prices DE-LU: Bundesnetzagentur | SMARD.de, license CC BY 4.0.
 """
 
 import json
@@ -313,7 +313,7 @@ def EnergyBackfill(timer: func.TimerRequest) -> None:
 # Tomorrow's prices are published daily at around 13:00 local time, so
 # today + tomorrow is queried every 15 minutes – once the auction result is
 # published, tomorrow's prices are in the Eventhouse at most 15 minutes later.
-# Licence DE-LU: CC BY 4.0, Bundesnetzagentur | SMARD.de
+# License DE-LU: CC BY 4.0, Bundesnetzagentur | SMARD.de
 BIDDING_ZONE = os.getenv("ENERGY_BIDDING_ZONE", "DE-LU")
 
 
@@ -344,7 +344,7 @@ def EnergyPriceIngest(timer: func.TimerRequest) -> None:
         event["endpoint"] = "price"
         # Auction results are fixed prices, not a forecast
         event["is_forecast"] = False
-    logging.info("EnergyPriceIngest: %d prices (available until %s, licence: %s)",
+    logging.info("EnergyPriceIngest: %d prices (available until %s, license: %s)",
                  len(events), envelope.get("available_until"), envelope.get("license"))
 
     sent = send_to_eventstream(events)
