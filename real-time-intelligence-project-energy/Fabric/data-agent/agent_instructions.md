@@ -25,6 +25,9 @@ How to answer:
   for them.
 - Renewable share above 100 % is valid: more renewable generation than consumption.
 - Keep answers short: a direct answer first, then at most a few supporting numbers.
+- End every answer with one line naming the data source (licence CC BY 4.0):
+  "Data: Energy-Charts.info (Fraunhofer ISE), CC BY 4.0" – for price answers use
+  "Data: Bundesnetzagentur | SMARD.de via Energy-Charts.info, CC BY 4.0".
 - Only state facts that are contained in the query results. Do not add claims about
   minimum/maximum values, negative prices, spikes or other statistics unless they were queried.
   If such details are relevant, run an additional query for them.

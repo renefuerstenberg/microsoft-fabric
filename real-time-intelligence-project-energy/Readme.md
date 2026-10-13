@@ -694,5 +694,20 @@ nightly gap before midnight UTC is expected.
 | Generation, signal, cross-border flows, grid frequency | [Energy-Charts.info](https://energy-charts.info), Fraunhofer ISE | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | Day-ahead prices DE-LU | [Bundesnetzagentur \| SMARD.de](https://www.smard.de) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 
-The attribution is shown on every dashboard page (Markdown tile *Data sources*). Keep it when
-publishing screenshots or derived data.
+CC BY 4.0 requires four things: the **creator**, a **link to the licence**, a **link to the
+source** and a note **whether the data was changed**. This project changes the data
+(aggregation, grouping into source groups, unit conversion such as EUR/MWh → ct/kWh, minute
+values from second values), so every attribution includes a short *Changes* note.
+
+Where the attribution appears:
+
+| Place | Attribution |
+|---|---|
+| Dashboard pages *Grid Live* and *Electricity Prices* | Markdown tile *Data sources* (text in `Fabric/kql/02_dashboard_grid_live.kql`) |
+| Dashboard page *Grid Frequency* | Own Markdown tile *Data source* (text in `Fabric/kql/04_grid_frequency.kql`) |
+| Data agent / Microsoft 365 Copilot | Every answer ends with a source line (rule in `agent_instructions.md`) |
+| Slides, screenshots, posts | One line below the image, e.g. *"Data: Energy-Charts.info (Fraunhofer ISE), Bundesnetzagentur \| SMARD.de · CC BY 4.0 · aggregated"* |
+
+Keep the attribution when publishing screenshots or derived data. The API returns the licence
+of each endpoint in the field `license` (EnergyPriceIngest writes it to the Azure Function
+log) – if it ever changes, update the tiles accordingly.

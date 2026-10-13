@@ -214,6 +214,14 @@ energy_latest
 // ------------------------------------------------------------
 // Tile 10: Data Sources                      Visual: Markdown tile
 // Required attribution according to the CC BY 4.0 licence.
+// CC BY 4.0 requires: creator, licence link, source link, and a note
+// whether the data was changed. Same text on pages Grid Live and
+// Electricity Prices.
 // Content (copy into the Markdown tile, without the leading //):
 // ------------------------------------------------------------
-// **Data:** [Energy-Charts.info](https://energy-charts.info) – Fraunhofer ISE (CC BY 4.0) · **Electricity prices:** Bundesnetzagentur | SMARD.de (CC BY 4.0)
+// **Data sources**
+//
+// - Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+// - Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), retrieved via the Energy-Charts API
+//
+// *Changes: values aggregated, grouped and converted (e.g. EUR/MWh → ct/kWh). Updated every 5 minutes (prices every 15 minutes) · All times in German local time*

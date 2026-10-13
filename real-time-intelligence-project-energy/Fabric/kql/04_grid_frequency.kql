@@ -180,6 +180,14 @@ GridFrequency()
 
 // ------------------------------------------------------------
 // Tile: Data Sources                         Visual: Markdown tile
+// CC BY 4.0: creator, licence link, source link, note on changes.
+// Check the "license" field of the API response
+// (https://api.energy-charts.info/v2/frequency?region=DE-Freiburg)
+// and use exactly that creator/licence if it differs.
 // Content (copy into the Markdown tile, without the leading //):
 // ------------------------------------------------------------
-// **Data:** [Energy-Charts.info](https://energy-charts.info) – grid frequency measured at Fraunhofer ISE, Freiburg (CC BY 4.0)
+// **Data source**
+//
+// - Grid frequency (measured in Freiburg, 1-second values): [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+//
+// *Changes: aggregated to minimum, average and maximum per minute; deviation from 50 Hz calculated. Updated every minute · All times in German local time*

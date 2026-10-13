@@ -6,7 +6,7 @@
 //
 // Conversion: EUR/MWh / 10 = ct/kWh
 // Tomorrow's prices are published daily at around 13:00 local time.
-// Attribution required by the licence:
+// Attribution required by the licence (see tile "Data Sources" below):
 //   "Electricity prices: Bundesnetzagentur | SMARD.de (CC BY 4.0)"
 //
 // Layout:
@@ -113,6 +113,13 @@ price
 
 // ------------------------------------------------------------
 // Tile: Data Sources                         Visual: Markdown tile
+// Same text as on page Grid Live (CC BY 4.0: creator, licence link,
+// source link, note on changes).
 // Content (copy into the Markdown tile, without the leading //):
 // ------------------------------------------------------------
-// **Data:** [Energy-Charts.info](https://energy-charts.info) – Fraunhofer ISE (CC BY 4.0) · **Electricity prices:** Bundesnetzagentur | SMARD.de (CC BY 4.0)
+// **Data sources**
+//
+// - Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+// - Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), retrieved via the Energy-Charts API
+//
+// *Changes: values aggregated, grouped and converted (e.g. EUR/MWh → ct/kWh). Updated every 5 minutes (prices every 15 minutes) · All times in German local time*
