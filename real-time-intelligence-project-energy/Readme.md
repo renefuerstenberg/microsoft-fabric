@@ -152,6 +152,7 @@ real-time-intelligence-project-energy/
 │   └── README.md                      Short developer notes (run, deploy)
 ├── Fabric/
 │   ├── data-agent/                    Configuration of the data agent "Power Mix Agent"
+│   │   ├── agent_description.md       Description shown to users when publishing (incl. sample questions)
 │   │   ├── agent_instructions.md      Agent instructions
 │   │   ├── datasource_description.md  Data source description for eh_1 (max. 800 characters)
 │   │   ├── datasource_instructions.md Data source instructions for eh_1
@@ -487,6 +488,7 @@ result. It is published in Fabric and in **Microsoft 365 Copilot**.
 | Data source description | `Fabric/data-agent/datasource_description.md` (max. 800 characters) |
 | Data source instructions | `Fabric/data-agent/datasource_instructions.md` |
 | Agent instructions | `Fabric/data-agent/agent_instructions.md` |
+| Description (Publish) | `Fabric/data-agent/agent_description.md` – shown to users in Fabric and Copilot; contains sample questions, because the *Sample questions* button in the chat only offers generic, non-editable Fabric prompts |
 | Example queries | `Fabric/data-agent/example_queries.json` (upload) / `.kql` (readable) – 20 question/query pairs |
 | Language | Questions in **English** (other languages are not officially supported) |
 | Answer limit | Max. 25 rows / 25 columns shown; the query tool returns max. 200 rows |
