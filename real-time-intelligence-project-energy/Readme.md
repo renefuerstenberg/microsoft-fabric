@@ -1,9 +1,10 @@
-# Power Mix Germany - Real-Time Intelligence with Energy-Charts
+# Power Mix Germany – Real-Time Intelligence with Energy-Charts
 
 A real-time data pipeline for the German power grid built on **Microsoft Fabric Real-Time
 Intelligence**. Azure Functions poll the public Energy-Charts API of Fraunhofer ISE. A Fabric
 Eventstream routes the events into an Eventhouse, where the data is kept permanently. A
-Real-Time Dashboard and Activator alerts sit on top of the Eventhouse.
+Real-Time Dashboard, Activator alerts and a Fabric data agent (also available in Microsoft 365
+Copilot) sit on top of the Eventhouse.
 
 | What | Detail |
 |---|---|
@@ -11,6 +12,7 @@ Real-Time Dashboard and Activator alerts sit on top of the Eventhouse.
 | Latency | ~2 min (frequency), 15–90 min (generation data, set by the source), prices for tomorrow from ~13:00 |
 | Retention | Permanent (36,500 days), recoverability enabled |
 | Fabric workspace | RTI Energy Germany |
+| Fabric capacity | Paid **F capacity** (F2 or higher) – **required for the data agent** |
 | Licence of the data | CC BY 4.0 (see [Licences and attribution](#licences-and-attribution)) |
 
 ---
@@ -27,12 +29,12 @@ Real-Time Dashboard and Activator alerts sit on top of the Eventhouse.
 8. [Eventhouse data model](#eventhouse-data-model)
 9. [Real-Time Dashboard](#real-time-dashboard)
 10. [Activator alerts](#activator-alerts)
-11. [Setup from scratch](#setup-from-scratch)
-12. [Local development and deployment](#local-development-and-deployment)
-13. [Git integration of the Fabric items](#git-integration-of-the-fabric-items)
-14. [Data quality and known characteristics](#data-quality-and-known-characteristics)
-15. [Monitoring and troubleshooting](#monitoring-and-troubleshooting)
-16. [Roadmap](#roadmap)
+11. [Data agent](#data-agent)
+12. [Setup from scratch](#setup-from-scratch)
+13. [Local development and deployment](#local-development-and-deployment)
+14. [Git integration of the Fabric items](#git-integration-of-the-fabric-items)
+15. [Data quality and known characteristics](#data-quality-and-known-characteristics)
+16. [Monitoring and troubleshooting](#monitoring-and-troubleshooting)
 17. [Licences and attribution](#licences-and-attribution)
 
 ---
@@ -53,6 +55,9 @@ Real-Time Dashboard and Activator alerts sit on top of the Eventhouse.
   source publishes newer figures.
 - **Seven e-mail alerts**: green power, grid congestion, high export, negative prices
   (now / tomorrow), frequency deviations and pipeline outages.
+- **Data agent**: ask questions in natural language (English) – in Fabric or in Microsoft 365
+  Copilot – e.g. *"When is electricity cheapest today?"* or *"How does the price depend on the
+  renewable share?"*
 - **Everything in Git**: function code, KQL scripts and all Fabric items (through Fabric Git
   integration) in one repository.
 
@@ -86,7 +91,9 @@ flowchart LR
         DB["Dashboard Power Mix Germany<br/>3 pages"]
         QS["Queryset Power Mix Alerts<br/>alert queries"]
         ACT["Power Mix Activator<br/>7 rules → e-mail"]
+        AG["Data agent Power Mix Agent<br/>NL2KQL via agent functions"]
     end
+    COP["Microsoft 365 Copilot"]
 
     API --> F1 & F2 & F3 & F4
     F1 & F2 & F3 & F4 -- "Event Hubs protocol (JSON)" --> ES
@@ -95,6 +102,7 @@ flowchart LR
     T2 --> MV3
     MV1 & FN & MV3 --> DB
     MV1 & FN & T1 --> QS --> ACT
+    EH -- "agent functions (read-only)" --> AG --> COP
 ```
 
 Plain-text version:
@@ -113,6 +121,9 @@ Energy-Charts API v2 ──> Azure Functions (Python 3.13, Flex Consumption)
                        └──────────────┬───────────────────┘
                                       ▼
    Dashboard "Power Mix Germany" (3 pages) · "Power Mix Activator" (7 rules)
+                                      │  agent functions (read-only)
+                                      ▼
+          Data agent "Power Mix Agent" ──> Microsoft 365 Copilot
 ```
 
 **Design decisions**
@@ -140,17 +151,25 @@ real-time-intelligence-project-energy/
 │   ├── .funcignore / .gitignore
 │   └── README.md                      Short developer notes (run, deploy)
 ├── Fabric/
-│   └── kql/                           KQL scripts (setup, dashboard tiles, alerts)
+│   ├── data-agent/                    Configuration of the data agent "Power Mix Agent"
+│   │   ├── agent_instructions.md      Agent instructions
+│   │   ├── datasource_description.md  Data source description for eh_1 (max. 800 characters)
+│   │   ├── datasource_instructions.md Data source instructions for eh_1
+│   │   ├── example_queries.kql        20 example queries (readable, with comments)
+│   │   └── example_queries.json       The same 20 examples in Fabric's upload format
+│   └── kql/                           KQL scripts (setup, dashboard tiles, alerts, agent functions)
 │       ├── 01_setup_eventhouse.kql    Table energy_raw, MV energy_latest, policies, checks
 │       ├── 02_dashboard_grid_live.kql Dashboard page "Grid Live" (tiles + descriptions)
 │       ├── 03_dashboard_prices.kql    Dashboard page "Electricity Prices"
 │       ├── 04_grid_frequency.kql      Table frequency_raw, MVs, GridFrequency(), checks, page "Grid Frequency"
-│       └── 05_activator_alerts.kql    Queries and settings of all 7 Activator rules
+│       ├── 05_activator_alerts.kql    Queries and settings of all 7 Activator rules
+│       └── 06_data_agent_functions.kql 8 helper functions for the data agent + checks
 ├── eh_1.Eventhouse/                   ┐
 ├── PowerMix Stream.Eventstream/       │
 ├── Power Mix Activator.Reflex/        │ Fabric items – written and read by
 ├── Power Mix Alerts.KQLQueryset/      │ Fabric Git integration
-├── Power Mix Germany.KQLDashboard/    ┘
+├── Power Mix Germany.KQLDashboard/    │
+├── Power Mix Agent.<type>/            ┘ (data agent – folder name as created by Fabric)
 └── .vscode/                           Editor settings
 ```
 
@@ -158,15 +177,16 @@ real-time-intelligence-project-energy/
 
 | Item | Type | Purpose |
 |---|---|---|
-| `eh_1` | Eventhouse / KQL database | Tables, materialized views, function `GridFrequency()` |
+| `eh_1` | Eventhouse / KQL database | Tables, materialized views, function `GridFrequency()` and the 8 agent functions |
 | `PowerMix Stream` | Eventstream | Custom endpoint, routing into `energy_raw` and `frequency_raw` |
 | `Power Mix Germany` | Real-Time Dashboard | 3 pages: Grid Live, Electricity Prices, Grid Frequency |
 | `Power Mix Alerts` | KQL Queryset | The 7 alert queries |
 | `Power Mix Activator` | Activator | 7 rules with e-mail actions |
+| `Power Mix Agent` | Data agent | Natural-language Q&A over eh_1, published to Microsoft 365 Copilot. Requires a paid **F capacity**. Its instructions and examples are additionally kept readable in `Fabric/data-agent/` |
 
 `energy-ingest/local.settings.json` contains the connection string and is never committed.
 The folders ending in `.Eventhouse`, `.Eventstream`, `.Reflex`, `.KQLQueryset` and
-`.KQLDashboard` are managed by Fabric – edit them only as described in
+`.KQLDashboard` (and the data agent folder) are managed by Fabric – edit them only as described in
 [Git integration of the Fabric items](#git-integration-of-the-fabric-items).
 
 ---
@@ -247,8 +267,8 @@ All settings except the connection string are optional; the defaults are built i
 
 | Function | Runs/day | Events per run (approx.) |
 |---|---|---|
-| EnergyIngest | 288 | ~2,900–3,000 |
-| EnergyBackfill | 8 | ~25,000 + ~14,400 frequency seconds |
+| EnergyIngest | 288 | ~1,700–3,000 (grows during the day, as "today" fills up) |
+| EnergyBackfill | 8 | ~5,000–10,000 + ~14,400 frequency seconds |
 | EnergyPriceIngest | 96 | 96–192 |
 | FrequencyIngest | 1,440 | ~60 (first run after a restart: ~1,800) |
 
@@ -343,6 +363,7 @@ KQL database **eh_1**. Setup scripts: `Fabric/kql/01_setup_eventhouse.kql` and `
 | `frequency_1s` | `frequency_raw \| summarize hz = take_any(hz) by ts` | Deduplicated second values |
 | `frequency_1min` | `min / avg / max(hz)` and `samples = count()` per minute | Fast long-term analyses |
 | `GridFrequency()` | `frequency_1s \| project ts, hz, deviation_mhz = round((hz - 50) * 1000, 1)` | Convenience function with the deviation from 50 Hz in mHz |
+| Agent functions (folder *Agent*) | `PowerMix()`, `LoadAndShare()`, `TrafficLight()`, `DayAheadPrice()`, `CrossBorderFlows()`, `NetImport()`, `GridFrequencyPerMinute()`, `PriceVsRenewableShare()` | Clean, typed views for the data agent – see [Data agent](#data-agent) |
 
 ### Policies
 
@@ -446,6 +467,78 @@ How the rules work:
 
 ---
 
+## Data agent
+
+> **Important:** using a Fabric data agent requires a **paid Fabric capacity (F2 or higher)**.
+> The workspace must be assigned to such a capacity (Workspace settings → License info).
+
+The data agent **Power Mix Agent** answers questions about the data in natural language. It
+translates each question into KQL (NL2KQL), runs it read-only against eh_1 and explains the
+result. It is published in Fabric and in **Microsoft 365 Copilot**.
+
+### Setup
+
+| Aspect | Setting |
+|---|---|
+| Workspace | Same workspace as all other items (*RTI Energy Germany*) |
+| Capacity | **A paid Fabric capacity (F2 or higher) is required** to use data agents – a trial capacity is not sufficient. Agent and data source must be on capacities in the same region. |
+| Tenant settings | Data agent items enabled, Copilot / Azure OpenAI features enabled, cross-geo processing and storing for AI enabled |
+| Data source | KQL database **eh_1** – only the **Functions** are selected. Tables and materialized views are deselected so the agent cannot bypass the functions. |
+| Data source description | `Fabric/data-agent/datasource_description.md` (max. 800 characters) |
+| Data source instructions | `Fabric/data-agent/datasource_instructions.md` |
+| Agent instructions | `Fabric/data-agent/agent_instructions.md` |
+| Example queries | `Fabric/data-agent/example_queries.json` (upload) / `.kql` (readable) – 20 question/query pairs |
+| Language | Questions in **English** (other languages are not officially supported) |
+| Answer limit | Max. 25 rows / 25 columns shown; the query tool returns max. 200 rows |
+
+### Agent functions
+
+Created by `Fabric/kql/06_data_agent_functions.kql` (folder *Agent* in eh_1). All functions
+return `ts` (UTC, for filtering) and `Time_local` (Europe/Berlin, for display); units are part of
+the column names.
+
+| Function | Content |
+|---|---|
+| `PowerMix()` | Generation per source group (GW), with `IsRenewable` |
+| `LoadAndShare()` | Load, residual load (GW), renewable share (%) |
+| `TrafficLight()` | Traffic light and renewable share incl. forecast (`IsFuture`) |
+| `DayAheadPrice()` | Day-ahead price in EUR/MWh and ct/kWh |
+| `CrossBorderFlows()` | Flow per neighbouring country (MW) with `CountriesReported` |
+| `NetImport()` | Net exchange with all neighbours (GW) with `CountriesReported` |
+| `GridFrequencyPerMinute()` | Min / avg / max frequency and max. deviation per minute |
+| `PriceVsRenewableShare(lookback)` | **Fixed analysis**: price per renewable-share band plus one *Total* row with overall average, number of quarter-hours and correlation |
+
+### Lessons learned from testing
+
+| Observation | Fix |
+|---|---|
+| With access to `energy_latest` the agent bypassed the functions and returned a **forecast** value as "now", with the UTC time shown as local time | Only functions selected as data source; rules "always filter `ts <= now()` for *now*" and "show `Time_local`, never `ts`" |
+| `startofweek(x, 1)` was used for "this week" – the second parameter is an **offset in weeks**, so next week was queried | Rule: weeks start on Monday, compute Monday explicitly; example query for "this week" |
+| Open analysis questions (price vs. renewable share) were computed differently on every run, sometimes from 200 truncated raw rows or with a wrong correlation | Rules "always aggregate in KQL" and "one result table per query"; the analysis is encapsulated in `PriceVsRenewableShare()` |
+| The language model averaged band prices (unweighted) and summed totals repeated in every row (2,100 instead of 420 quarter-hours) | Function returns every figure **exactly once** – totals as a separate *Total* row, never repeated per row |
+| Copilot added unsupported claims ("no negative prices") – there was one negative quarter-hour | Agent rule: only state facts contained in query results; query extra details if needed |
+| Long periods ("last 30 days") are only partially covered | Agent rule: always state the actual period and number of data points |
+
+**Rule of thumb:** simple factual questions are handled reliably by the agent with the base
+functions and examples. Recurring analyses with statistics belong in a dedicated KQL function so
+that every answer – in Fabric, in Copilot and in the dashboard – is computed the same way.
+
+### Updating the agent
+
+1. Change functions in eh_1 (`06_data_agent_functions.kql`) and test them in a queryset.
+2. Update instructions / examples in the agent (example queries can be uploaded as JSON –
+   delete the existing ones first).
+3. Test in a **new chat** in Fabric and check the generated KQL.
+4. **Publish** (with the Microsoft 365 Copilot option) – Copilot always uses the last published
+   version.
+5. Copy the changed files into `Fabric/` and commit.
+
+Note: Microsoft 365 Copilot rephrases questions and answers. Answers there can be shorter or
+formatted differently than in the Fabric chat; for figures that must be exact, the Fabric chat
+(which shows the generated KQL) is the more transparent source.
+
+---
+
 ## Setup from scratch
 
 1. **Eventhouse**: create an Eventhouse with the KQL database `eh_1`.
@@ -466,6 +559,9 @@ How the rules work:
    `Power Mix Germany.KQLDashboard/`.
 8. **Alerts**: create a KQL queryset with the queries from `Fabric/kql/05_activator_alerts.kql`,
    then *Add alert* for every rule, all saved to the same Activator item.
+9. **Data agent** (optional, requires a paid F capacity): run
+   `Fabric/kql/06_data_agent_functions.kql`, then create the data agent as described in
+   [Data agent](#data-agent).
 
 ---
 
@@ -520,6 +616,7 @@ here: Eventstream, Eventhouse / KQL database, KQL queryset, Real-Time Dashboard 
 | KQL queryset | `Power Mix Alerts.KQLQueryset/RealTimeQueryset.json` | Yes – tab content and titles. Keep tab IDs (Activator refers to them). |
 | Activator | `Power Mix Activator.Reflex/ReflexEntities.json` | With care (preview) – query text, rule names, field names, e-mail texts. Keep all `uniqueIdentifier` values. |
 | Eventstream | `PowerMix Stream.Eventstream/eventstream.json` | With care – the live data flow is republished. Do not rename the custom endpoint source. |
+| Data agent | `Power Mix Agent.<type>/` | Prefer the Fabric UI; keep `Fabric/data-agent/` in sync as readable copy. |
 | Eventhouse / KQL database | `eh_1.Eventhouse/` (schema files) | Prefer running schema changes as KQL commands in a queryset. |
 
 Do not rename the KQL database `eh_1`: the Eventstream destinations refer to it by name.
@@ -558,7 +655,7 @@ energy_raw
 | order by Ingested desc
 ```
 
-Expected: about 2,900–3,000 rows per 5 minutes, all other columns 0.
+Expected: about 1,700–3,000 rows per 5 minutes (more in backfill runs), all other columns 0.
 
 **How current is the grid frequency?**
 
@@ -583,16 +680,8 @@ nightly gap before midnight UTC is expected.
 | Frequency gap other than at midnight UTC | Function restart or outage longer than 30 min | Wait for the next EnergyBackfill (every 3 h) or start it manually; compare with the source URL |
 | Tile shows "function not found" | Query still uses an old function name | Update the query to `GridFrequency()` |
 | `Syntax error: The incomplete fragment is unexpected`, no syntax colouring, `let` underlined | A reserved word is used as a variable name (e.g. `let latest = …`) | Rename the variable (e.g. `last_ts`) |
-
----
-
-## Roadmap
-
-- **Fabric Maps**: cross-border flows as a map with arrows per neighbouring country.
-- **OneLake availability**: expose the tables as Delta tables for Power BI (Direct Lake),
-  Lakehouse and notebooks.
-- **Long-term analyses**: monthly power mix, price statistics, frequency events per month.
-- **Neighbouring countries' power mix**: show which energy sources the imported power comes from.
+| Data agent in Copilot says "no data", in Fabric it works | Copilot uses an older published version | Publish the agent again (with the Copilot option), start a new Copilot chat |
+| Data agent gives different results for the same question | The agent designs open analyses itself | Add an example query or encapsulate the analysis in a function (see [Data agent](#data-agent)) |
 
 ---
 
