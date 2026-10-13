@@ -347,7 +347,7 @@
         "width": 24,
         "height": 3
       },
-      "markdownText": "**Data sources**\n\n- Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n\n*Updated every 5 minutes (prices every 15 minutes) · All times in German local time*",
+      "markdownText": "**Data sources**\n\n- Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), retrieved via the Energy-Charts API\n\n*Changes: values aggregated, grouped and converted (e.g. EUR/MWh → ct/kWh). Updated every 5 minutes (prices every 15 minutes) · All times in German local time*",
       "visualOptions": {}
     },
     {
@@ -683,7 +683,21 @@
         "width": 24,
         "height": 3
       },
-      "markdownText": "**Data sources**\n\n- Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n\n*Updated every 5 minutes (prices every 15 minutes) · All times in German local time*",
+      "markdownText": "**Data sources**\n\n- Power generation, renewable share, cross-border flows: [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n- Electricity prices (day-ahead, DE-LU): [Bundesnetzagentur | SMARD.de](https://www.smard.de) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), retrieved via the Energy-Charts API\n\n*Changes: values aggregated, grouped and converted (e.g. EUR/MWh → ct/kWh). Updated every 5 minutes (prices every 15 minutes) · All times in German local time*",
+      "visualOptions": {}
+    },
+    {
+      "id": "1b9dca64-1d2c-4871-a847-03c84be071a9",
+      "title": "",
+      "visualType": "markdownCard",
+      "pageId": "3c1d39af-621c-4395-8c4f-2b3f86520eb8",
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 24,
+        "height": 4
+      },
+      "markdownText": "**Data source**\n\n- Grid frequency (measured in Freiburg, 1-second values): [Energy-Charts.info](https://energy-charts.info) (Fraunhofer ISE) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)\n\n*Changes: aggregated to minimum, average and maximum per minute; deviation from 50 Hz calculated. Updated every minute · All times in German local time*",
       "visualOptions": {}
     }
   ],
