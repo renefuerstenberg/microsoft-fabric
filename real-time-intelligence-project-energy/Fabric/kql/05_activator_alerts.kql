@@ -11,8 +11,16 @@
 //      These conditions fire only when the value CROSSES the threshold,
 //      not on every query run.
 //   5. Occurrence: "Every time the condition is met".
-//   6. Action: Email. Use column values in the text as @ColumnName.
-//      Context: add all columns of the query.
+//   6. Action: Email. Context / additional information: add all columns
+//      of the query first. Then insert column values into the text by
+//      typing "@" and PICKING the column from the list (it becomes a
+//      highlighted chip). Pasted or typed "@ColumnName" stays plain text
+//      and is NOT replaced in the e-mail. In the notes below, every
+//      @ColumnName marks such a chip.
+//      Do not insert datetime columns (AsOf, LastIngestion) into the text:
+//      they appear as ISO with a misleading "Z" (e.g. 2026-10-13T10:15:00Z),
+//      although the value is German local time. Keep them in Context only –
+//      the table below the message shows them readable.
 //   7. Save to the existing item "Power Mix Activator".
 //
 // Note: a rule can fire immediately after creation if the current
@@ -28,16 +36,22 @@
 //   Alert 1 – rule name: "Lots of Green Power"
 //     When: TrafficLight -> Increases above 1
 //     Subject:  "🟢 Lots of green power right now"
-//     Headline: "The power traffic light has switched to green"
-//     Notes:    "Renewable share right now: @RenewableShare %. Good time for the
-//                washing machine, dishwasher or EV charging."
+//     Headline: "Traffic light switched to green"
+//     Notes:    "Renewables are covering @RenewableShare % of Germany's power demand
+//                right now. Good time to run the dishwasher or washing machine, or to
+//                charge the EV. The forecast for the next hours is on the Grid Live
+//                page of the Power Mix Germany dashboard. AsOf below is German local
+//                time."
 //
 //   Alert 2 – rule name: "Grid Congestion"
 //     When: TrafficLight -> Decreases below 0
 //     Subject:  "⛔ Grid congestion in the German power grid"
-//     Headline: "The power traffic light shows grid congestion"
-//     Notes:    "The power grid is currently heavily loaded. If possible, switch
-//                on power-hungry appliances later."
+//     Headline: "Traffic light switched to grid congestion"
+//     Notes:    "The Energy-Charts traffic light reports grid congestion.
+//                Power lines in parts of the grid are at their limit – this is not a
+//                power shortage. Renewable share right now: @RenewableShare %.
+//                If you can, move heavy loads such as EV charging or a heat pump to
+//                a later time. AsOf below is German local time."
 // ------------------------------------------------------------
 let ts_now = toscalar(
     energy_latest
@@ -57,8 +71,13 @@ energy_latest
 //   When: NetImport_GW -> Decreases below -5   (export above 5 GW)
 //   Run query every: 15 minutes
 //   Subject:  "⚡ Germany is exporting more than 5 GW of power"
-//   Headline: "High power surplus: Germany is exporting more than 5 GW"
-//   Notes:    "Net import right now: @NetImport_GW GW (negative = export). As of: @AsOf"
+//   Headline: "High net power export"
+//   Notes:    "Net exchange with all neighbors: @NetImport_GW GW (negative = export)
+//              in the latest complete quarter-hour. That is more than the output of
+//              five large power plant units. High exports usually mean plenty of wind
+//              or solar power in Germany. Which countries take the power: see
+//              Cross-Border Flows on the Grid Live page. AsOf below is German
+//              local time."
 //   Only uses the latest completely reported timestamp
 //   (same completeness rule as the dashboard tiles):
 //   all 11 countries; if none within the last 6 h, at least 10 of 11.
@@ -83,9 +102,14 @@ energy_latest
 //   Run query every: 5 minutes
 //   Normal: 0–5 minutes (EnergyIngest runs every 5 minutes)
 //   Subject:  "🔧 Power mix pipeline: no new data"
-//   Headline: "No data in the Eventhouse for more than 30 minutes"
-//   Notes:    "Last data received: @LastIngestion. Please check the Azure Function
-//              and the Eventstream."
+//   Headline: "Pipeline outage"
+//   Notes:    "No new data for @MinutesWithoutData minutes.
+//              Normally new data arrives every 5 minutes. Check in this order:
+//              1. Function App – are EnergyIngest runs failing?
+//              2. Eventstream PowerMix Stream – does the source receive events?
+//              3. Energy-Charts API – is api.energy-charts.info reachable?
+//              Until this is fixed, dashboard and alerts show outdated values.
+//              LastIngestion below is German local time."
 // ------------------------------------------------------------
 energy_raw
 | where ingestion_time() > ago(1d)
@@ -102,10 +126,13 @@ energy_raw
 //   Fires once a day as soon as the auction for tomorrow is
 //   published (around 13:00) and contains negative prices.
 //   Subject:  "💶 Negative electricity prices tomorrow"
-//   Headline: "Negative exchange electricity prices announced for tomorrow"
-//   Notes:    "@NegativeQuarterHoursTomorrow quarter-hours with a negative price,
-//              lowest price @MinPrice_ct_kWh ct/kWh. Good opportunity for
-//              power-hungry appliances or EV charging with a dynamic tariff."
+//   Headline: "Tomorrow's auction contains negative prices"
+//   Notes:    "Tomorrow's day-ahead auction has @NegativeQuarterHoursTomorrow
+//              quarter-hours with a negative price. Lowest price: @MinPrice_ct_kWh
+//              ct/kWh. With a dynamic tariff, plan EV charging and heavy appliances
+//              for these hours – exact times are on the Electricity Prices page.
+//              Grid fees and taxes still apply, so the price you pay usually stays
+//              positive."
 // ------------------------------------------------------------
 let tomorrow = startofday(datetime_utc_to_local(now(), "Europe/Berlin")) + 1d;
 energy_latest
@@ -122,9 +149,12 @@ energy_latest
 //   When: Price_ct_kWh -> Decreases below 0
 //   Run query every: 15 minutes
 //   Subject:  "💶 Electricity price is negative right now"
-//   Headline: "The exchange electricity price is currently below zero"
-//   Notes:    "Current price: @Price_ct_kWh ct/kWh (as of @AsOf). Now is a good
-//              time for power-hungry appliances."
+//   Headline: "Negative exchange price"
+//   Notes:    "Day-ahead price for the current quarter-hour: @Price_ct_kWh ct/kWh.
+//              There is more power in the grid than needed, usually
+//              from strong solar or wind. With a dynamic tariff, now is the time for
+//              heavy loads. Prices for the next hours: Electricity Prices page.
+//              AsOf below is German local time."
 // ------------------------------------------------------------
 energy_latest
 | where endpoint == "price" and ts <= now()
@@ -144,8 +174,15 @@ energy_latest
 //   100 mHz is rare (weeks can pass without); use 50 for more alerts.
 //   Subject:  "〰️ Grid frequency deviates strongly"
 //   Headline: "Grid frequency more than 100 mHz away from 50 Hz"
-//   Notes:    "Max deviation: @MaxDeviation_mHz mHz, lowest @Lowest_Hz Hz,
-//              highest @Highest_Hz Hz (as of @AsOf)."
+//   Notes:    "The grid frequency deviated strongly from 50 Hz. Maximum deviation
+//              in mHz: @MaxDeviation_mHz. Range in Hz: @Lowest_Hz – @Highest_Hz.
+//              Below 50 Hz the grid is short of power, above 50 Hz it has too much;
+//              reserve power steps in automatically within seconds. Deviations above
+//              100 mHz are rare and often happen at the full hour, when power plant
+//              schedules change. Details: Grid Frequency page. AsOf below is German
+//              local time."
+//   (Units are placed BEFORE the chips: a word typed right after a chip
+//   was lost in the Activator editor.)
 // ------------------------------------------------------------
 let last_ts = toscalar(GridFrequency() | summarize max(ts));
 GridFrequency()
