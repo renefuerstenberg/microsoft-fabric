@@ -1,10 +1,15 @@
-# Power Mix Germany – Real-Time Intelligence with Energy-Charts
+# Power Mix Germany
 
-A real-time data pipeline for the German power grid built on **Microsoft Fabric Real-Time
-Intelligence**. Azure Functions poll the public Energy-Charts API of Fraunhofer ISE. A Fabric
+**From API to Data Agent: Germany's power grid with Real-Time Intelligence in Microsoft Fabric**
+
+A real-time data pipeline for the German power grid built on **Real-Time Intelligence in
+Microsoft Fabric**. Azure Functions poll the public Energy-Charts API of Fraunhofer ISE. A Fabric
 Eventstream routes the events into an Eventhouse, where the data is kept permanently. A
-Real-Time Dashboard, Activator alerts and a Fabric data agent (also available in Microsoft 365
-Copilot) sit on top of the Eventhouse.
+Real-Time Dashboard, Activator alerts and a Fabric data agent sit on top of the Eventhouse.
+
+```
+API → Azure Functions → Eventstream → Eventhouse → Dashboard · Activator · Data Agent
+```
 
 | What | Detail |
 |---|---|
@@ -55,9 +60,9 @@ Copilot) sit on top of the Eventhouse.
   source publishes newer figures.
 - **Seven e-mail alerts**: green power, grid congestion, high export, negative prices
   (now / tomorrow), frequency deviations and pipeline outages.
-- **Data agent**: ask questions in natural language (English) – in Fabric or in Microsoft 365
-  Copilot – e.g. *"When is electricity cheapest today?"* or *"How does the price depend on the
-  renewable share?"*
+- **Data agent**: ask questions in natural language (English), e.g. *"When is electricity
+  cheapest today?"* or *"How does the price depend on the renewable share?"* – optionally also
+  available in Microsoft 365 Copilot (additional licence, see [Data agent](#data-agent)).
 - **Everything in Git**: function code, KQL scripts and all Fabric items (through Fabric Git
   integration) in one repository.
 
@@ -93,7 +98,6 @@ flowchart LR
         ACT["Power Mix Activator<br/>7 rules → e-mail"]
         AG["Data agent Power Mix Agent<br/>NL2KQL via agent functions"]
     end
-    COP["Microsoft 365 Copilot"]
 
     API --> F1 & F2 & F3 & F4
     F1 & F2 & F3 & F4 -- "Event Hubs protocol (JSON)" --> ES
@@ -102,7 +106,7 @@ flowchart LR
     T2 --> MV3
     MV1 & FN & MV3 --> DB
     MV1 & FN & T1 --> QS --> ACT
-    EH -- "agent functions (read-only)" --> AG --> COP
+    EH -- "agent functions (read-only)" --> AG
 ```
 
 Plain-text version:
@@ -123,7 +127,7 @@ Energy-Charts API v2 ──> Azure Functions (Python 3.13, Flex Consumption)
    Dashboard "Power Mix Germany" (3 pages) · "Power Mix Activator" (7 rules)
                                       │  agent functions (read-only)
                                       ▼
-          Data agent "Power Mix Agent" ──> Microsoft 365 Copilot
+                     Data agent "Power Mix Agent"
 ```
 
 **Design decisions**
@@ -183,7 +187,7 @@ real-time-intelligence-project-energy/
 | `Power Mix Germany` | Real-Time Dashboard | 3 pages: Grid Live, Electricity Prices, Grid Frequency |
 | `Power Mix Alerts` | KQL Queryset | The 7 alert queries |
 | `Power Mix Activator` | Activator | 7 rules with e-mail actions |
-| `Power Mix Agent` | Data agent | Natural-language Q&A over eh_1, published to Microsoft 365 Copilot. Requires a paid **F capacity**. Its instructions and examples are additionally kept readable in `Fabric/data-agent/` |
+| `Power Mix Agent` | Data agent | Natural-language Q&A over eh_1 (optionally published to Microsoft 365 Copilot). Requires a paid **F capacity**. Its instructions and examples are additionally kept readable in `Fabric/data-agent/` |
 
 `energy-ingest/local.settings.json` contains the connection string and is never committed.
 The folders ending in `.Eventhouse`, `.Eventstream`, `.Reflex`, `.KQLQueryset` and
@@ -475,7 +479,8 @@ How the rules work:
 
 The data agent **Power Mix Agent** answers questions about the data in natural language. It
 translates each question into KQL (NL2KQL), runs it read-only against eh_1 and explains the
-result. It is published in Fabric and in **Microsoft 365 Copilot**.
+result. It is used in Fabric; publishing it to Microsoft 365 Copilot is optional (see
+[Optional: Microsoft 365 Copilot](#optional-microsoft-365-copilot)).
 
 ### Setup
 
@@ -488,7 +493,7 @@ result. It is published in Fabric and in **Microsoft 365 Copilot**.
 | Data source description | `Fabric/data-agent/datasource_description.md` (max. 800 characters) |
 | Data source instructions | `Fabric/data-agent/datasource_instructions.md` |
 | Agent instructions | `Fabric/data-agent/agent_instructions.md` |
-| Description (Publish) | `Fabric/data-agent/agent_description.md` – shown to users in Fabric and Copilot; contains sample questions, because the *Sample questions* button in the chat only offers generic, non-editable Fabric prompts |
+| Description (Publish) | `Fabric/data-agent/agent_description.md` – shown to users in Fabric (and Copilot, if published); contains sample questions, because the *Sample questions* button in the chat only offers generic, non-editable Fabric prompts |
 | Example queries | `Fabric/data-agent/example_queries.json` (upload) / `.kql` (readable) – 20 question/query pairs |
 | Language | Questions in **English** (other languages are not officially supported) |
 | Answer limit | Max. 25 rows / 25 columns shown; the query tool returns max. 200 rows |
@@ -518,12 +523,12 @@ the column names.
 | `startofweek(x, 1)` was used for "this week" – the second parameter is an **offset in weeks**, so next week was queried | Rule: weeks start on Monday, compute Monday explicitly; example query for "this week" |
 | Open analysis questions (price vs. renewable share) were computed differently on every run, sometimes from 200 truncated raw rows or with a wrong correlation | Rules "always aggregate in KQL" and "one result table per query"; the analysis is encapsulated in `PriceVsRenewableShare()` |
 | The language model averaged band prices (unweighted) and summed totals repeated in every row (2,100 instead of 420 quarter-hours) | Function returns every figure **exactly once** – totals as a separate *Total* row, never repeated per row |
-| Copilot added unsupported claims ("no negative prices") – there was one negative quarter-hour | Agent rule: only state facts contained in query results; query extra details if needed |
+| The agent (in Copilot) added unsupported claims ("no negative prices") – there was one negative quarter-hour | Agent rule: only state facts contained in query results; query extra details if needed |
 | Long periods ("last 30 days") are only partially covered | Agent rule: always state the actual period and number of data points |
 
 **Rule of thumb:** simple factual questions are handled reliably by the agent with the base
 functions and examples. Recurring analyses with statistics belong in a dedicated KQL function so
-that every answer – in Fabric, in Copilot and in the dashboard – is computed the same way.
+that every answer – in the agent and in the dashboard – is computed the same way.
 
 ### Updating the agent
 
@@ -531,13 +536,24 @@ that every answer – in Fabric, in Copilot and in the dashboard – is computed
 2. Update instructions / examples in the agent (example queries can be uploaded as JSON –
    delete the existing ones first).
 3. Test in a **new chat** in Fabric and check the generated KQL.
-4. **Publish** (with the Microsoft 365 Copilot option) – Copilot always uses the last published
-   version.
+4. **Publish** the agent.
 5. Copy the changed files into `Fabric/` and commit.
 
-Note: Microsoft 365 Copilot rephrases questions and answers. Answers there can be shorter or
-formatted differently than in the Fabric chat; for figures that must be exact, the Fabric chat
-(which shows the generated KQL) is the more transparent source.
+### Optional: Microsoft 365 Copilot
+
+When publishing the data agent, it can also be made available in **Microsoft 365 Copilot**.
+Users can then ask questions about the power grid directly in the Copilot chat.
+
+- **Licensing:** this requires additional licences on top of the Fabric capacity – typically a
+  **Microsoft 365 Copilot licence**. Users also need at least read access to the data agent and
+  its data source. Check the current requirements in the
+  [Microsoft documentation](https://learn.microsoft.com/en-us/fabric/data-science/data-agent-microsoft-copilot-studio)
+  before rolling it out.
+- **Versions:** Copilot always uses the **last published version** – republish after every
+  change and start a new Copilot chat.
+- **Answers:** Copilot rephrases questions and answers. Answers can be shorter or formatted
+  differently than in the Fabric chat; for figures that must be exact, the Fabric chat (which
+  shows the generated KQL) is the more transparent source.
 
 ---
 
@@ -705,7 +721,7 @@ Where the attribution appears:
 |---|---|
 | Dashboard pages *Grid Live* and *Electricity Prices* | Markdown tile *Data sources* (text in `Fabric/kql/02_dashboard_grid_live.kql`) |
 | Dashboard page *Grid Frequency* | Own Markdown tile *Data source* (text in `Fabric/kql/04_grid_frequency.kql`) |
-| Data agent / Microsoft 365 Copilot | Every answer ends with a source line (rule in `agent_instructions.md`) |
+| Data agent (and Microsoft 365 Copilot, if published) | Every answer ends with a source line (rule in `agent_instructions.md`) |
 | Slides, screenshots, posts | One line below the image, e.g. *"Data: Energy-Charts.info (Fraunhofer ISE), Bundesnetzagentur \| SMARD.de · CC BY 4.0 · aggregated"* |
 
 Keep the attribution when publishing screenshots or derived data. The API returns the licence
