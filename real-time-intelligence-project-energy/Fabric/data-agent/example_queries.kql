@@ -1,0 +1,184 @@
+// ============================================================
+// Example queries for the Fabric data agent "Power Mix Agent"
+// Data source: KQL database eh_1
+//
+// In the data agent: Data source eh_1 -> "Example queries" -> Add.
+// Copy the question (line after "Q:") into "Question" and the KQL
+// below it into "Query". Test each query in a queryset first.
+// ============================================================
+
+
+// Q: What is the renewable share right now?
+TrafficLight()
+| where ts <= now()
+| top 1 by ts desc
+| project Time_local, RenewableShare_Pct, TrafficLightText
+
+
+// Q: What is the current renewable share and traffic light?
+TrafficLight()
+| where ts <= now()
+| top 1 by ts desc
+| project Time_local, TrafficLightText, RenewableShare_Pct
+
+
+// Q: What does the renewable share forecast look like for the next hours?
+TrafficLight()
+| where ts > now() and ts <= now() + 12h
+| summarize RenewableShare_Pct = round(avg(RenewableShare_Pct), 1),
+            TrafficLightText = take_any(TrafficLightText)
+    by Hour_local = bin(Time_local, 1h)
+| order by Hour_local asc
+
+
+// Q: What is the current power mix?
+let last_ts = toscalar(PowerMix() | where ts > ago(1d) | summarize max(ts));
+PowerMix()
+| where ts == last_ts
+| project Time_local, Source, GW
+| order by GW desc
+
+
+// Q: How much solar power was generated yesterday?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let from_utc = datetime_local_to_utc(today_local - 1d, "Europe/Berlin");
+let to_utc = datetime_local_to_utc(today_local, "Europe/Berlin");
+PowerMix()
+| where ts >= from_utc and ts < to_utc and Source == "Solar"
+| summarize Energy_GWh = round(sum(GW) * 0.25, 1), Peak_GW = max(GW)
+
+
+// Q: What was the share of each energy source in yesterday's generation?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let from_utc = datetime_local_to_utc(today_local - 1d, "Europe/Berlin");
+let to_utc = datetime_local_to_utc(today_local, "Europe/Berlin");
+PowerMix()
+| where ts >= from_utc and ts < to_utc
+| summarize Energy_GWh = sum(GW) * 0.25 by Source
+| extend Share_Pct = round(100.0 * Energy_GWh / toscalar(
+      PowerMix() | where ts >= from_utc and ts < to_utc | summarize sum(GW) * 0.25), 1),
+         Energy_GWh = round(Energy_GWh, 1)
+| order by Energy_GWh desc
+
+
+// Q: What was the renewable share per day over the last 7 days?
+PowerMix()
+| where ts > ago(7d)
+| summarize Renewable_GWh = sumif(GW, IsRenewable) * 0.25, Total_GWh = sum(GW) * 0.25
+    by Date_local = startofday(Time_local)
+| project Date_local,
+          RenewableShareOfGeneration_Pct = round(100.0 * Renewable_GWh / Total_GWh, 1),
+          Total_GWh = round(Total_GWh, 1)
+| order by Date_local asc
+
+
+// Q: What was the peak load yesterday and when?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let from_utc = datetime_local_to_utc(today_local - 1d, "Europe/Berlin");
+let to_utc = datetime_local_to_utc(today_local, "Europe/Berlin");
+LoadAndShare()
+| where ts >= from_utc and ts < to_utc
+| top 1 by Load_GW desc
+| project Time_local, Load_GW, ResidualLoad_GW, RenewableShare_Pct
+
+
+// Q: What is the electricity price right now?
+DayAheadPrice()
+| where ts <= now()
+| top 1 by ts desc
+| project Time_local, Price_ct_kWh, Price_EUR_MWh
+
+
+// Q: When is electricity cheapest today?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let from_utc = datetime_local_to_utc(today_local, "Europe/Berlin");
+let to_utc = datetime_local_to_utc(today_local + 1d, "Europe/Berlin");
+DayAheadPrice()
+| where ts >= from_utc and ts < to_utc
+| top 3 by Price_ct_kWh asc
+| project Time_local, Price_ct_kWh
+
+
+// Q: Are there negative prices tomorrow?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let from_utc = datetime_local_to_utc(today_local + 1d, "Europe/Berlin");
+let to_utc = datetime_local_to_utc(today_local + 2d, "Europe/Berlin");
+DayAheadPrice()
+| where ts >= from_utc and ts < to_utc
+| summarize QuarterHours = count(),
+            NegativeQuarterHours = countif(Price_ct_kWh < 0),
+            Min_ct_kWh = min(Price_ct_kWh),
+            FirstNegative_local = minif(Time_local, Price_ct_kWh < 0)
+
+
+// Q: What was the average electricity price per day this week?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let monday_local = today_local - ((toint(dayofweek(today_local) / 1d) + 6) % 7) * 1d;
+let from_utc = datetime_local_to_utc(monday_local, "Europe/Berlin");
+let to_utc = datetime_local_to_utc(today_local + 1d, "Europe/Berlin");
+DayAheadPrice()
+| where ts >= from_utc and ts < to_utc
+| summarize Avg_ct_kWh = round(avg(Price_ct_kWh), 2),
+            Min_ct_kWh = min(Price_ct_kWh),
+            Max_ct_kWh = max(Price_ct_kWh)
+    by Date_local = startofday(Time_local)
+| order by Date_local asc
+
+
+// Q: How does the electricity price depend on the renewable share in the last 30 days?
+PriceVsRenewableShare(30d)
+
+
+// Q: What is the correlation between the renewable share and the electricity price?
+PriceVsRenewableShare(30d)
+| where RenewableBand startswith "6"
+| project Correlation, Avg_ct_kWh, QuarterHours, From_local, To_local
+
+
+// Q: Is Germany currently importing or exporting electricity?
+let last_cbpf = toscalar(NetImport() | where ts > ago(2d) | summarize max(ts));
+NetImport()
+| where ts > ago(2d) and ts <= last_cbpf - 30m and CountriesReported >= 10
+| top 1 by ts desc
+| project Time_local, NetImport_GW, CountriesReported
+
+
+// Q: From which countries did Germany import the most electricity yesterday?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let from_utc = datetime_local_to_utc(today_local - 1d, "Europe/Berlin");
+let to_utc = datetime_local_to_utc(today_local, "Europe/Berlin");
+CrossBorderFlows()
+| where ts >= from_utc and ts < to_utc and CountriesReported >= 10
+| summarize NetFlow_GWh = round(sum(Flow_MW) / 1000 * 0.25, 2) by Country
+| order by NetFlow_GWh desc
+
+
+// Q: What was the largest grid frequency deviation today and when?
+let today_local = startofday(datetime_utc_to_local(now(), "Europe/Berlin"));
+let from_utc = datetime_local_to_utc(today_local, "Europe/Berlin");
+GridFrequencyPerMinute()
+| where ts >= from_utc
+| top 1 by MaxDeviation_mHz desc
+| project Time_local, MaxDeviation_mHz, Min_Hz, Max_Hz
+
+
+// Q: How many minutes had a frequency deviation above 100 mHz in the last 30 days?
+GridFrequencyPerMinute()
+| where ts > ago(30d)
+| summarize MinutesAbove100mHz = countif(MaxDeviation_mHz > 100),
+            MinutesAbove50mHz = countif(MaxDeviation_mHz > 50),
+            MaxDeviation_mHz = max(MaxDeviation_mHz)
+
+
+// Q: What is the grid frequency right now?
+GridFrequency()
+| where ts > ago(15m)
+| top 1 by ts desc
+| project Time_local = datetime_utc_to_local(ts, "Europe/Berlin"), hz, deviation_mhz
+
+
+// Q: How often was the traffic light green in the last 7 days?
+TrafficLight()
+| where ts > ago(7d) and ts <= now()
+| summarize Hours = round(count() * 0.25, 1) by TrafficLightText
+| order by Hours desc
