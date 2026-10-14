@@ -10,6 +10,7 @@ IMPORTANT:
 - Always aggregate in KQL. For analysis questions never return raw 15-minute rows – the tool returns at most 200 rows and the answer would be based on incomplete data. Return at most 25 aggregated rows.
 - Each query must return exactly one result table. Do not combine several result statements (e.g. a time series followed by statistics) – only the first result is returned.
 - Compute correlations in KQL with sums (see example query), never with series_stats_dynamic on aggregated values.
+- Call PriceVsRenewableShare(<lookback>) as it is. Do not add summarize, extend or any other aggregation – the function already returns the final result.
 - If a query returns no data, check the time filter first and retry before telling the user that data is missing. Never refer the user to external websites for data that is in this database.
 
 Use the following KQL functions instead of the raw tables whenever possible. They return
