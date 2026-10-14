@@ -17,6 +17,12 @@
         "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
       },
       {
+        "id": "82c87692-6402-4f5e-b428-e38da695b8fd",
+        "content": "let cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\" and ts == LatestComplete\n| project NetImport_GW = round(value, 2),\n          AsOf = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card",
+        "title": "Alert 3: High Export",
+        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
+      },
+      {
         "id": "2692ea03-c25f-4df2-aee8-0098e9a8fea0",
         "content": "energy_raw\n| where ingestion_time() > ago(1d)\n| summarize LastIngestionUtc = max(ingestion_time())\n| project MinutesWithoutData = datetime_diff(\"minute\", now(), LastIngestionUtc),\n          LastIngestion = datetime_utc_to_local(LastIngestionUtc, \"Europe/Berlin\")\n| render card",
         "title": "Alert 4: Data Outage",
@@ -32,12 +38,6 @@
         "id": "f10d5c99-7e49-419e-a33d-7a10c132dd52",
         "content": "energy_latest\n| where endpoint == \"price\" and ts <= now()\n| top 1 by ts desc\n| project Price_ct_kWh = round(value / 10, 2),\n          AsOf = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card",
         "title": "Alert 6: Price Negative Now",
-        "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
-      },
-      {
-        "id": "82c87692-6402-4f5e-b428-e38da695b8fd",
-        "content": "let cbpf_ts = energy_latest\n    | where endpoint == \"cbpf\" and series_id != \"sum\"\n    | summarize Reported = countif(value != 0) by ts;\nlet cbpf_max = toscalar(energy_latest | where endpoint == \"cbpf\" | summarize max(ts));\nlet complete11 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 11 | summarize max(ts));\nlet complete10 = toscalar(cbpf_ts | where ts <= cbpf_max - 30m and Reported >= 10 | summarize max(ts));\nlet LatestComplete = iff(isnotnull(complete11) and complete11 >= cbpf_max - 6h, complete11, complete10);\nenergy_latest\n| where endpoint == \"cbpf\" and series_id == \"sum\" and ts == LatestComplete\n| project NetImport_GW = round(value, 2),\n          AsOf = datetime_utc_to_local(ts, \"Europe/Berlin\")\n| render card",
-        "title": "Alert 3: High Export",
         "dataSourceId": "37d32987-477d-4b27-a6e2-0fa7f3225a93"
       },
       {
