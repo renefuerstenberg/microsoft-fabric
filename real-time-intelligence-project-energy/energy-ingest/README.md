@@ -6,7 +6,7 @@ Eventstream *PowerMix Stream*. Full project documentation: [../Readme.md](../Rea
 | Function | Schedule (UTC) | Data |
 |---|---|---|
 | EnergyIngest | every 5 min | public_power, signal, cbpf |
-| EnergyBackfill | every 3 h | public_power + cbpf (last 3 days), frequency (last 4 h) |
+| EnergyBackfill | every 3 h | public_power + cbpf (last 3 days), frequency (last 9 h) |
 | EnergyPriceIngest | every 15 min | day-ahead prices DE-LU (today + tomorrow) |
 | FrequencyIngest | every minute | grid frequency per second |
 

@@ -237,16 +237,16 @@ All functions live in `function_app.py` (Python programming model v2) and share 
 
 | Helper | Purpose |
 |---|---|
-| `fetch_api()` | GET request with 2 attempts; handles 404 (no data), 429 (Retry-After), 5xx (retry after 5 s) |
+| `fetch_api()` | GET request with 2 attempts and a connect/read timeout of 10/25 s; handles 404 (no data), 429 (Retry-After), 5xx (retry after 5 s) |
 | `envelope_to_events()` | Flattens a v2 response into one event per timestamp and series; converts timestamps to UTC; skips `null` values; sets `is_forecast` |
-| `send_to_eventstream()` | Sends events in batches with `EventHubProducerClient` (connection string incl. `EntityPath`) |
+| `send_to_eventstream()` | Sends events in batches with `EventHubProducerClient` (connection string incl. `EntityPath`); max. 3 retries and 60 s per batch, so a run fails fast instead of hanging |
 
 ### Functions and schedules (UTC, NCRONTAB with seconds)
 
 | Function | Schedule | What it loads | Why |
 |---|---|---|---|
 | **EnergyIngest** | `30 */5 * * * *` | `public_power` (last 6 h), `signal` (today + forecast), `cbpf` (yesterday + today) | Main ingest. cbpf always covers yesterday + today because it is published with a delay of up to 5 h+. If the day-range request fails, it falls back to today only. |
-| **EnergyBackfill** | `45 2 */3 * * *` | `public_power` + `cbpf` of the last 3 days, `frequency` of the last 4 h | Energy-Charts corrects values for many hours after the first publication. The backfill re-sends them; `energy_latest` keeps the newest version. It also closes frequency gaps after restarts. |
+| **EnergyBackfill** | `45 2 */3 * * *` | `public_power` + `cbpf` of the last 3 days, `frequency` of the last 9 h | Energy-Charts corrects values for many hours after the first publication. The backfill re-sends them; `energy_latest` keeps the newest version. It also closes frequency gaps after restarts and API outages of up to about 6 hours (9 h window, run every 3 h). |
 | **EnergyPriceIngest** | `15 1/15 * * * *` | `price` DE-LU, today + tomorrow | Tomorrow's prices appear once the auction is published (~13:00 local time) and are in the Eventhouse at most 15 minutes later. |
 | **FrequencyIngest** | `50 * * * * *` | `frequency`, overlapping 30-min window | Sends only seconds that have not been sent yet (in-memory set per instance). After a restart the window is sent again; duplicates are removed by `frequency_1s`. |
 
@@ -264,9 +264,13 @@ moment, and keep EnergyIngest away from the OpenSky function in the same app.
 | `ENERGY_BIDDING_ZONE` | `DE-LU` | Bidding zone for prices |
 | `FREQUENCY_REGION` | `DE-Freiburg` | Measurement point of the grid frequency |
 | `FREQUENCY_WINDOW_MINUTES` | `30` | Overlapping window of FrequencyIngest |
-| `FREQUENCY_BACKFILL_HOURS` | `4` | Frequency hours reloaded by EnergyBackfill |
+| `FREQUENCY_BACKFILL_HOURS` | `9` | Frequency hours reloaded by EnergyBackfill (covers API outages of up to ~6 h) |
 
 All settings except the connection string are optional; the defaults are built into the code.
+
+`host.json` sets `functionTimeout` to **4 minutes**. Timer triggers never run the same function
+twice in parallel – a hanging run would block all following runs of that function. The timeout
+ends such a run, so the next scheduled run starts normally.
 
 ### Typical load
 

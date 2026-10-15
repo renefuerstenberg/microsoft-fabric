@@ -9,7 +9,7 @@ Eventhouse eh_1 (tables energy_raw and frequency_raw).
 Functions in this app (all timer triggers, schedules in UTC):
   - EnergyIngest       every 5 min   public_power, signal, cbpf
   - EnergyBackfill     every 3 h     reloads public_power + cbpf (last 3 days)
-                                     and frequency (last 4 h) to pick up late
+                                     and frequency (last 9 h) to pick up late
                                      corrections and close gaps
   - EnergyPriceIngest  every 15 min  day-ahead prices DE-LU (today + tomorrow)
   - FrequencyIngest    every minute  grid frequency, 1 value per second
@@ -53,7 +53,8 @@ COUNTRY = os.getenv("ENERGY_COUNTRY", "de")
 # How far back every EnergyIngest run queries. Chosen generously so that
 # quarter-hours filled in or corrected later are picked up again.
 LOOKBACK_HOURS = int(os.getenv("ENERGY_LOOKBACK_HOURS", "6"))
-HTTP_TIMEOUT = 30
+# (connect, read) in seconds – a hanging API connection must never block a run
+HTTP_TIMEOUT = (10, 25)
 MAX_RETRY_AFTER_SECONDS = 60  # Longer waits are skipped until the next run
 USER_AGENT = "EnergyIngest/1.0 (Fabric RTI)"
 LOCAL_TZ = ZoneInfo("Europe/Berlin")  # The API's day format refers to local time
@@ -177,6 +178,10 @@ def send_to_eventstream(events: list[dict]) -> int:
     producer = EventHubProducerClient.from_connection_string(
         conn_str=os.environ["EVENTSTREAM_CONNECTION_STRING"],
         # The event hub name is already included as EntityPath in the connection string
+        # Limited retries so a run fails fast instead of hanging (functionTimeout in host.json)
+        retry_total=3,
+        retry_backoff_factor=0.8,
+        retry_backoff_max=10,
     )
     sent = 0
     with producer:
@@ -187,12 +192,12 @@ def send_to_eventstream(events: list[dict]) -> int:
                 batch.add(data)
             except ValueError:
                 # Batch full -> send it and start a new one
-                producer.send_batch(batch)
+                producer.send_batch(batch, timeout=60)
                 sent += len(batch)
                 batch = producer.create_batch()
                 batch.add(data)
         if len(batch) > 0:
-            producer.send_batch(batch)
+            producer.send_batch(batch, timeout=60)
             sent += len(batch)
     return sent
 
@@ -360,12 +365,13 @@ def EnergyPriceIngest(timer: func.TimerRequest) -> None:
 # remembered in the instance's memory and skipped; seconds that the API
 # delivers late are therefore still captured. After a restart the whole
 # window is sent again – duplicates are removed by frequency_1s.
-# Longer outages are repaired by EnergyBackfill (last 4 h, every 3 h).
+# Longer outages are repaired by EnergyBackfill (last 9 h, every 3 h).
+# 9 h: an API outage of up to ~6 h is closed automatically by the next run.
 # Note: the source itself has a short gap (null values) every day shortly
 # before midnight UTC; those seconds are never published and cannot be loaded.
 FREQ_REGION = os.getenv("FREQUENCY_REGION", "DE-Freiburg")
 FREQ_WINDOW_MINUTES = int(os.getenv("FREQUENCY_WINDOW_MINUTES", "30"))
-FREQ_BACKFILL_HOURS = int(os.getenv("FREQUENCY_BACKFILL_HOURS", "4"))
+FREQ_BACKFILL_HOURS = int(os.getenv("FREQUENCY_BACKFILL_HOURS", "9"))
 _freq_sent: set[str] = set()
 
 
