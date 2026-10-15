@@ -12,7 +12,7 @@
     "tabs": [
       {
         "id": "68d288ec-18e0-4a49-8ce8-27df198c4ab4",
-        "content": "// ------------------------------------------------------------\n// A6) NetImport(): net exchange with all neighbors\n// ------------------------------------------------------------\n.create-or-alter function with (folder = \"Agent\", docstring = \"Net physical power exchange of Germany with all neighboring countries, 15-minute values in GW. Positive = net import, negative = net export. CountriesReported = how many of 11 countries had reported.\")\nNetImport() {\n    let reported = energy_latest\n        | where endpoint == \"cbpf\" and series_id != \"sum\"\n        | summarize CountriesReported = countif(value != 0) by ts;\n    energy_latest\n    | where endpoint == \"cbpf\" and series_id == \"sum\"\n    | join kind=inner reported on ts\n    | project ts,\n              Time_local = datetime_utc_to_local(ts, \"Europe/Berlin\"),\n              NetImport_GW = round(value, 3),\n              CountriesReported\n}",
+        "content": "// Ankommende Daten pro 5 Minuten in den letzten 3 Stunden, getrennt nach Quelle\nunion\n    (energy_raw    | where ingestion_time() > ago(3h) | extend Source = endpoint),\n    (frequency_raw | where ingestion_time() > ago(3h) | extend Source = \"frequency\")\n| summarize Rows = count()\n    by Source, Ingested = bin(datetime_utc_to_local(ingestion_time(), \"Europe/Berlin\"), 5m)\n| order by Ingested desc, Source asc",
         "title": "Tab",
         "dataSourceId": "710cba50-4849-4de1-8c14-30c3c6bd5c29"
       }
